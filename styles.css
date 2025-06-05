@@ -371,7 +371,7 @@ body {
 .course-table th {
     background: #181926;
     padding: 1rem 1.5rem;
-    text-align: left;
+    text-align: center;
     font-weight: 600;
     color: #cad3f5;
     font-size: 0.9rem;
@@ -384,6 +384,7 @@ body {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid #5b6078;
     color: #cad3f5;
+    text-align: center;
 }
 
 .course-table tbody tr:hover {
@@ -398,7 +399,7 @@ body {
 /* Quality Points Cell Layout */
 .quality-points {
     position: relative;
-    text-align: left;
+    text-align: center;
     min-width: 120px;
     vertical-align: middle;
 }
@@ -460,6 +461,7 @@ body {
     font-weight: 500;
     transition: all 0.3s ease;
     box-sizing: border-box;
+    text-align: center;
 }
 
 .editable-row input:focus {
