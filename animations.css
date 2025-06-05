@@ -1,0 +1,89 @@
+/* Success message styles */
+.success-message {
+    margin: 2rem 0;
+    animation: slideInDown 0.5s ease-out;
+}
+
+.success-content {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Additional animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply animations to elements */
+.upload-card {
+    animation: fadeIn 0.8s ease-out;
+}
+
+.results-section.show {
+    animation: slideInUp 0.6s ease-out;
+}
+
+.summary-card {
+    animation: slideInUp 0.6s ease-out;
+}
+
+.summary-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.summary-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.table-card {
+    animation: slideInUp 0.6s ease-out 0.3s;
+    animation-fill-mode: both;
+}
+
+/* Hover effects for interactive elements */
+.upload-area, .upload-btn, .summary-card {
+    will-change: transform;
+}
+
+/* Focus styles for accessibility */
+.upload-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+/* Table row animations */
+.course-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.course-table tbody tr:hover {
+    transform: translateX(5px);
+}

@@ -1,22 +1,52 @@
 {
-  "name": "should-i-retake",
-  "version": "1.0.0",
-  "description": "Upload your gradesheet, change the grade for any course, and instantly see how your CGPA would improve. A simple tool to help you decide if retaking a course is worth the fee.",
+  "name": "grade-sheet-analyzer",
+  "version": "2.0.0",
+  "description": "A modern, client-side web application for analyzing PDF grade sheets. Extract course information, calculate CGPA, and visualize academic progress.",
   "main": "index.html",
   "scripts": {
+    "start": "python3 -m http.server 8000",
     "serve": "python3 -m http.server 8000",
-    "serve-node": "npx http-server . -p 8000 -c-1"
+    "serve-node": "npx http-server . -p 8000 -c-1 -o",
+    "dev": "npx live-server --port=8000 --open=/",
+    "build": "echo 'This is a client-side application - no build step required'",
+    "test": "echo 'No tests specified yet'",
+    "lint": "echo 'Linting with ESLint would go here'",
+    "format": "echo 'Code formatting with Prettier would go here'"
   },
   "keywords": [
-    "grade",
-    "cgpa",
-    "pdf",
-    "parser",
-    "education"
+    "grade-sheet",
+    "pdf-parser",
+    "cgpa-calculator",
+    "academic-analyzer",
+    "student-tools",
+    "education",
+    "javascript",
+    "pdf.js",
+    "client-side"
   ],
-  "author": "",
+  "author": {
+    "name": "Grade Sheet Analyzer Team",
+    "email": "contact@gradesheetanalyzer.com"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/grade-sheet-analyzer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/grade-sheet-analyzer/issues"
+  },
+  "homepage": "https://your-username.github.io/grade-sheet-analyzer",
   "devDependencies": {
-    "http-server": "^14.1.1"
-  }
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
 }
