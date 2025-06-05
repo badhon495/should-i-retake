@@ -594,14 +594,14 @@ body {
 
 .delete-course-btn {
     background: linear-gradient(135deg, #ed8796, #f5a97f);
-    color: #1e2030;
+    color: #ffffff;
     border: none;
     border-radius: 8px;
     padding: 0.5rem;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
     min-width: 60px;
     box-shadow: 0 2px 4px rgba(237, 135, 150, 0.3);
     margin: 0 auto;
@@ -612,6 +612,7 @@ body {
     background: linear-gradient(135deg, #ee99a0, #f4dbd6);
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(237, 135, 150, 0.4);
+    color: #24273a;
 }
 
 .delete-course-btn:active {

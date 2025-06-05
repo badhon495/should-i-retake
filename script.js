@@ -377,10 +377,10 @@ class GradeSheetAnalyzer {
             return original && Math.abs(original.gradePoints - course.gradePoints) > 0.001;
         });
         
-        // Current CGPA: show original only if nothing changed, otherwise show current
-        document.getElementById('currentCGPA').textContent = (coursesDeleted || gradesModified) ? currentCGPA.toFixed(2) : originalCGPA.toFixed(2);
-        // Dream CGPA: always show current calculated value
-        document.getElementById('dreamCGPA').textContent = currentCGPA.toFixed(2);
+        // Current CGPA: always show original CGPA (unchanged)
+        document.getElementById('currentCGPA').textContent = originalCGPA.toFixed(4);
+        // Dream CGPA: always show current calculated value (reflects all changes)
+        document.getElementById('dreamCGPA').textContent = currentCGPA.toFixed(4);
     }
 
     /**
@@ -489,7 +489,7 @@ class GradeSheetAnalyzer {
                     <span class="quality-points-value">${course.qualityPoints.toFixed(2)}</span>
                 </td>
                 <td class="actions-column">
-                    <button class="delete-course-btn" onclick="analyzer.deleteCourse(${index})" title="Delete Course">🗑️</button>
+                    <button class="delete-course-btn" onclick="analyzer.deleteCourse(${index})" title="Delete Course">Delete</button>
                 </td>
             `;
             tableBody.appendChild(row);
@@ -548,8 +548,8 @@ class GradeSheetAnalyzer {
             </td>
             <td class="actions-column">
                 <div class="save-cancel-buttons">
-                    <button class="save-btn">💾 Save</button>
-                    <button class="cancel-btn">❌ Cancel</button>
+                    <button class="save-btn">Save</button>
+                    <button class="cancel-btn">Cancel</button>
                 </div>
             </td>
         `;
