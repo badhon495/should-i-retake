@@ -5,13 +5,13 @@
 }
 
 .success-content {
-    background: linear-gradient(135deg, #48bb78, #38a169);
-    color: white;
+    background: linear-gradient(135deg, #a6da95, #94e2d5);
+    color: #24273a;
     padding: 1rem 1.5rem;
     border-radius: 12px;
     text-align: center;
     font-weight: 600;
-    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
+    box-shadow: 0 8px 25px rgba(166, 218, 149, 0.3);
 }
 
 @keyframes slideInDown {
@@ -76,7 +76,7 @@
 /* Focus styles for accessibility */
 .upload-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 0 0 3px rgba(138, 173, 244, 0.3);
 }
 
 /* Table row animations */

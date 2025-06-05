@@ -8,6 +8,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 class GradeSheetAnalyzer {
     constructor() {
         this.courses = [];
+        this.originalCourses = []; // Store original grade points
         this.initializeEventListeners();
         this.showWelcomeMessage();
     }
@@ -33,6 +34,34 @@ class GradeSheetAnalyzer {
                 this.showError('Please select a valid PDF file.');
             }
         });
+
+        // Control buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'resetBtn') {
+                this.resetToOriginal();
+            } else if (e.target.id === 'applyPerfectBtn') {
+                this.applyPerfectGrades();
+            } else if (e.target.id === 'addCourseBtn') {
+                this.addNewCourseRow();
+            } else if (e.target.classList.contains('save-btn')) {
+                this.saveNewCourse(e.target);
+            } else if (e.target.classList.contains('cancel-btn')) {
+                this.cancelNewCourse(e.target);
+            }
+        });
+
+        // Remove the old add course form event listeners
+        // document.addEventListener('input', (e) => {
+        //     if (e.target.id === 'newCredits' || e.target.id === 'newGradePoints') {
+        //         this.updateQualityPointsPreview();
+        //     }
+        // });
+
+        // document.addEventListener('input', (e) => {
+        //     if (e.target.id === 'newCourseCode') {
+        //         e.target.value = e.target.value.toUpperCase();
+        //     }
+        // });
 
         // Drag and drop functionality
         uploadArea.addEventListener('dragover', (e) => {
@@ -150,6 +179,7 @@ class GradeSheetAnalyzer {
      */
     parseGradeSheet(text) {
         this.courses = [];
+        this.originalCourses = []; // Reset original courses
         
         console.log('🔍 Starting grade sheet parsing...');
         
@@ -198,12 +228,14 @@ class GradeSheetAnalyzer {
                         const courseKey = `${courseCode}_${credits}_${gradePoints}`;
                         
                         if (!seenCourses.has(courseKey)) {
-                            this.courses.push({
+                            const courseData = {
                                 courseCode: courseCode,
                                 credits: credits,
                                 gradePoints: gradePoints,
                                 qualityPoints: credits * gradePoints
-                            });
+                            };
+                            this.courses.push(courseData);
+                            this.originalCourses.push({...courseData}); // Store original values
                             seenCourses.add(courseKey);
                             console.log(`✅ Successfully parsed course: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}`);
                         } else {
@@ -282,12 +314,14 @@ class GradeSheetAnalyzer {
                             const courseKey = `${word}_${credits}_${gradePoints}`;
                             
                             if (!seenCourses.has(courseKey)) {
-                                this.courses.push({
+                                const courseData = {
                                     courseCode: word,
                                     credits: credits,
                                     gradePoints: gradePoints,
                                     qualityPoints: credits * gradePoints
-                                });
+                                };
+                                this.courses.push(courseData);
+                                this.originalCourses.push({...courseData}); // Store original values
                                 seenCourses.add(courseKey);
                                 console.log(`✅ Word method - parsed course: ${word}, Credits: ${credits}, Grade Points: ${gradePoints}`);
                                 break; // Found valid pair, move to next course
@@ -312,27 +346,151 @@ class GradeSheetAnalyzer {
     }
 
     /**
+     * Calculate original CGPA from original courses (fixed value)
+     */
+    calculateOriginalCGPA() {
+        if (this.originalCourses.length === 0) return 0;
+        
+        const totalQualityPoints = this.originalCourses.reduce((sum, course) => sum + course.qualityPoints, 0);
+        const totalCredits = this.originalCourses.reduce((sum, course) => sum + course.credits, 0);
+        
+        return totalCredits > 0 ? (totalQualityPoints / totalCredits) : 0;
+    }
+
+    /**
+     * Update summary cards with current values
+     */
+    updateSummaryCards() {
+        document.getElementById('totalCourses').textContent = this.courses.length;
+        document.getElementById('totalCredits').textContent = this.courses.reduce((sum, course) => sum + course.credits, 0).toFixed(2);
+        
+        // If no courses have been deleted and no grade changes, show original CGPA
+        // Otherwise, show the current calculated CGPA for both
+        const currentCGPA = this.calculateCGPA();
+        const originalCGPA = this.calculateOriginalCGPA();
+        
+        // Check if any courses have been deleted or grades modified
+        const coursesDeleted = this.courses.length < this.originalCourses.length;
+        const gradesModified = this.courses.some((course, index) => {
+            if (course.isManuallyAdded) return false; // Manually added courses don't affect this check
+            const original = this.originalCourses.find(orig => orig.courseCode === course.courseCode);
+            return original && Math.abs(original.gradePoints - course.gradePoints) > 0.001;
+        });
+        
+        // Current CGPA: show original only if nothing changed, otherwise show current
+        document.getElementById('currentCGPA').textContent = (coursesDeleted || gradesModified) ? currentCGPA.toFixed(2) : originalCGPA.toFixed(2);
+        // Dream CGPA: always show current calculated value
+        document.getElementById('dreamCGPA').textContent = currentCGPA.toFixed(2);
+    }
+
+    /**
+     * Update grade points for a specific course
+     */
+    updateGradePoints(courseIndex, newGradePoints) {
+        const gradePoints = parseFloat(newGradePoints);
+        
+        // Validate grade points
+        if (isNaN(gradePoints) || gradePoints < 0 || gradePoints > 4) {
+            this.showError('Grade points must be between 0.00 and 4.00');
+            // Reset to original value
+            const input = document.querySelector(`input[data-course-index="${courseIndex}"]`);
+            input.value = this.courses[courseIndex].gradePoints.toFixed(2);
+            return;
+        }
+
+        // Update course data
+        this.courses[courseIndex].gradePoints = gradePoints;
+        this.courses[courseIndex].qualityPoints = this.courses[courseIndex].credits * gradePoints;
+
+        // Update quality points display in the table
+        const row = document.querySelector(`input[data-course-index="${courseIndex}"]`).closest('tr');
+        row.querySelector('.quality-points').textContent = this.courses[courseIndex].qualityPoints.toFixed(2);
+
+        // Update summary cards
+        this.updateSummaryCards();
+
+        console.log(`📊 Updated course ${this.courses[courseIndex].courseCode}: Grade Points = ${gradePoints}, Quality Points = ${this.courses[courseIndex].qualityPoints.toFixed(2)}`);
+    }
+
+    /**
+     * Reset all courses to their original grade points
+     */
+    resetToOriginal() {
+        if (this.originalCourses.length === 0) {
+            this.showError('No original data to reset to');
+            return;
+        }
+
+        // Reset courses to original values
+        this.courses = this.originalCourses.map(course => ({...course}));
+        
+        // Update display
+        this.displayResults();
+        this.showSuccessMessage('✅ Reset to original grade points');
+        
+        console.log('🔄 Reset to original grade points');
+    }
+
+    /**
+     * Apply perfect grades (4.0) to all courses
+     */
+    applyPerfectGrades() {
+        if (this.courses.length === 0) {
+            this.showError('No courses to update');
+            return;
+        }
+
+        // Set all grade points to 4.0
+        this.courses.forEach(course => {
+            course.gradePoints = 4.0;
+            course.qualityPoints = course.credits * 4.0;
+        });
+
+        // Update display
+        this.displayResults();
+        this.showSuccessMessage('⭐ Applied perfect grades (4.0) to all courses!');
+        
+        console.log('⭐ Applied perfect grades (4.0) to all courses');
+    }
+
+    /**
      * Display parsed results on the webpage
      */
     displayResults() {
         console.log('🖥️ Displaying results on webpage...');
         
         // Update summary cards
-        document.getElementById('totalCourses').textContent = this.courses.length;
-        document.getElementById('totalCredits').textContent = this.courses.reduce((sum, course) => sum + course.credits, 0).toFixed(2);
-        document.getElementById('currentCGPA').textContent = this.calculateCGPA().toFixed(2);
+        this.updateSummaryCards();
 
-        // Populate course table
+        // Populate course table with editable grade points
         const tableBody = document.getElementById('courseTableBody');
         tableBody.innerHTML = '';
 
         this.courses.forEach((course, index) => {
             const row = document.createElement('tr');
+            
             row.innerHTML = `
-                <td class="course-code">${course.courseCode}</td>
+                <td class="course-code">
+                    ${course.courseCode}
+                    ${course.isManuallyAdded ? '<span class="manual-course-tag">Manual</span>' : ''}
+                </td>
                 <td>${course.credits.toFixed(2)}</td>
-                <td>${course.gradePoints.toFixed(2)}</td>
-                <td>${course.qualityPoints.toFixed(2)}</td>
+                <td>
+                    <input type="number" 
+                           class="grade-input" 
+                           value="${course.gradePoints.toFixed(2)}" 
+                           min="0" 
+                           max="4" 
+                           step="0.01" 
+                           data-course-index="${index}"
+                           onchange="analyzer.updateGradePoints(${index}, this.value)">
+                </td>
+                <td class="quality-points">
+                    <span class="quality-points-value">${course.qualityPoints.toFixed(2)}</span>
+                </td>
+                <td class="actions-column">
+                    <button class="delete-course-btn" onclick="analyzer.deleteCourse(${index})" title="Delete Course">🗑️</button>
+                </td>
             `;
             tableBody.appendChild(row);
         });
@@ -344,6 +502,172 @@ class GradeSheetAnalyzer {
             behavior: 'smooth',
             block: 'start'
         });
+    }
+
+    /**
+     * Add a new editable course row to the table
+     */
+    addNewCourseRow() {
+        const tableBody = document.getElementById('courseTableBody');
+        
+        // Check if there's already an editable row
+        if (tableBody.querySelector('.editable-row')) {
+            this.showError('Please complete or cancel the current course entry first.');
+            return;
+        }
+
+        const row = document.createElement('tr');
+        row.className = 'editable-row';
+        
+        row.innerHTML = `
+            <td>
+                <input type="text" 
+                       class="course-code-input" 
+                       placeholder="e.g., CSE101" 
+                       maxlength="10"
+                       style="text-transform: uppercase;">
+            </td>
+            <td>
+                <input type="number" 
+                       class="credits-input" 
+                       placeholder="3.00" 
+                       min="0" 
+                       max="10" 
+                       step="0.5">
+            </td>
+            <td>
+                <input type="number" 
+                       class="grade-points-input" 
+                       placeholder="4.00" 
+                       min="0" 
+                       max="4" 
+                       step="0.01">
+            </td>
+            <td class="quality-points">
+                <span class="quality-points-preview">-</span>
+            </td>
+            <td class="actions-column">
+                <div class="save-cancel-buttons">
+                    <button class="save-btn">💾 Save</button>
+                    <button class="cancel-btn">❌ Cancel</button>
+                </div>
+            </td>
+        `;
+
+        // Add event listener for automatic uppercase conversion
+        const courseCodeInput = row.querySelector('.course-code-input');
+        courseCodeInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Add event listeners for quality points preview calculation
+        const creditsInput = row.querySelector('.credits-input');
+        const gradePointsInput = row.querySelector('.grade-points-input');
+        const qualityPointsPreview = row.querySelector('.quality-points-preview');
+
+        const updateQualityPointsPreview = () => {
+            const credits = parseFloat(creditsInput.value) || 0;
+            const gradePoints = parseFloat(gradePointsInput.value) || 0;
+            const qualityPoints = credits * gradePoints;
+            qualityPointsPreview.textContent = qualityPoints.toFixed(2);
+        };
+
+        creditsInput.addEventListener('input', updateQualityPointsPreview);
+        gradePointsInput.addEventListener('input', updateQualityPointsPreview);
+
+        tableBody.appendChild(row);
+        
+        // Focus on the first input
+        courseCodeInput.focus();
+    }
+
+    /**
+     * Save the new course from the editable row
+     */
+    saveNewCourse(saveButton) {
+        const row = saveButton.closest('tr');
+        const courseCode = row.querySelector('.course-code-input').value.trim();
+        const credits = parseFloat(row.querySelector('.credits-input').value);
+        const gradePoints = parseFloat(row.querySelector('.grade-points-input').value);
+
+        // Validate input
+        const errors = [];
+
+        if (!courseCode) {
+            errors.push('Course code is required');
+        } else if (!/^[A-Z]{2,4}\d{3}$/.test(courseCode)) {
+            errors.push('Course code must be in format like CSE110, MAT215, etc.');
+        }
+
+        // Check for duplicate course code
+        if (this.courses.some(course => course.courseCode === courseCode)) {
+            errors.push('Course code already exists');
+        }
+
+        if (isNaN(credits) || credits <= 0 || credits > 10) {
+            errors.push('Credits must be between 0.5 and 10');
+        }
+
+        if (isNaN(gradePoints) || gradePoints < 0 || gradePoints > 4) {
+            errors.push('Grade points must be between 0.00 and 4.00');
+        }
+
+        if (errors.length > 0) {
+            this.showError(errors.join('. '));
+            return;
+        }
+
+        // Create new course object
+        const newCourse = {
+            courseCode: courseCode,
+            credits: credits,
+            gradePoints: gradePoints,
+            qualityPoints: credits * gradePoints,
+            isManuallyAdded: true
+        };
+
+        // Add to courses array
+        this.courses.push(newCourse);
+
+        // Remove the editable row and refresh display
+        row.remove();
+        this.displayResults();
+
+        // Show success message
+        this.showSuccessMessage(`✅ Successfully added ${courseCode} to your course list!`);
+
+        console.log(`➕ Added new course: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}`);
+    }
+
+    /**
+     * Cancel adding new course and remove the editable row
+     */
+    cancelNewCourse(cancelButton) {
+        const row = cancelButton.closest('tr');
+        row.remove();
+    }
+
+    /**
+     * Delete a course (both manually added and auto-added courses)
+     */
+    deleteCourse(courseIndex) {
+        const course = this.courses[courseIndex];
+        
+        if (!course) {
+            this.showError('Course not found.');
+            return;
+        }
+
+        // Remove the course from the current courses array
+        this.courses.splice(courseIndex, 1);
+
+        // Update display
+        this.displayResults();
+
+        // Show success message
+        this.showSuccessMessage(`✅ Deleted course ${course.courseCode} successfully!`);
+
+        console.log(`🗑️ Deleted course: ${course.courseCode}`);
     }
 
     /**
@@ -406,7 +730,7 @@ class GradeSheetAnalyzer {
 // Initialize the application when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Initializing Grade Sheet Analyzer...');
-    new GradeSheetAnalyzer();
+    window.analyzer = new GradeSheetAnalyzer();
     
     // Add some fun console art
     console.log(`
