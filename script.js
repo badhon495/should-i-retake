@@ -28,10 +28,17 @@ class GradeSheetAnalyzer {
         // File input change
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file && file.type === 'application/pdf') {
-                this.processPDF(file);
-            } else {
-                this.showError('Please select a valid PDF file.');
+            if (file) {
+                if (file.type === 'application/pdf') {
+                    this.processPDF(file);
+                } else if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                          file.type === 'application/vnd.ms-excel' || 
+                          file.name.endsWith('.xlsx') || 
+                          file.name.endsWith('.xls')) {
+                    this.processExcel(file);
+                } else {
+                    this.showError('Please select a valid PDF or Excel file (.pdf, .xlsx, .xls).');
+                }
             }
         });
 
@@ -39,8 +46,8 @@ class GradeSheetAnalyzer {
         document.addEventListener('click', (e) => {
             if (e.target.id === 'resetBtn') {
                 this.resetToOriginal();
-            } else if (e.target.id === 'applyPerfectBtn') {
-                this.applyPerfectGrades();
+            } else if (e.target.id === 'exportBtn') {
+                this.exportToExcel();
             } else if (e.target.id === 'addCourseBtn') {
                 this.addNewCourseRow();
             } else if (e.target.classList.contains('save-btn')) {
@@ -169,6 +176,49 @@ class GradeSheetAnalyzer {
         } catch (error) {
             console.error('❌ Error processing PDF:', error);
             this.showError('Error processing PDF. Please try again with a different file. Check browser console for details.');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    /**
+     * Process uploaded Excel file
+     */
+    async processExcel(file) {
+        try {
+            this.showLoading(true);
+            this.hideError();
+            this.hideResults();
+
+            console.log(`📊 Processing Excel: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+
+            const arrayBuffer = await file.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            
+            // Get the first sheet
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            
+            // Convert to JSON
+            const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            console.log('📝 Extracted Excel data:', data);
+            
+            // Parse the Excel data
+            this.parseExcelData(data);
+            
+            if (this.courses.length === 0) {
+                console.error('❌ No courses found in Excel file');
+                this.showError(`No valid courses found in the Excel file. Please make sure the file contains columns for Course Code, Credits, and Grade Points.`);
+                return;
+            }
+
+            this.displayResults();
+            this.showSuccessMessage(`✅ Successfully imported ${this.courses.length} courses from your Excel file!`);
+            
+        } catch (error) {
+            console.error('❌ Error processing Excel:', error);
+            this.showError('Error processing Excel file. Please check the file format and try again.');
         } finally {
             this.showLoading(false);
         }
@@ -334,6 +384,139 @@ class GradeSheetAnalyzer {
     }
 
     /**
+     * Parse Excel data and extract course information
+     */
+    parseExcelData(data) {
+        this.courses = [];
+        this.originalCourses = [];
+        
+        console.log('🔍 Starting Excel data parsing...');
+        console.log('📊 Excel data:', data);
+        
+        if (!data || data.length === 0) {
+            console.error('❌ No data found in Excel file');
+            return;
+        }
+        
+        // Find header row - look for common column names
+        let headerRowIndex = -1;
+        let courseCodeCol = -1;
+        let creditsCol = -1;
+        let gradePointsCol = -1;
+        
+        for (let i = 0; i < Math.min(5, data.length); i++) {
+            const row = data[i];
+            if (!Array.isArray(row)) continue;
+            
+            for (let j = 0; j < row.length; j++) {
+                const cell = String(row[j]).toLowerCase().trim();
+                
+                if (cell.includes('course') && cell.includes('code')) {
+                    courseCodeCol = j;
+                    headerRowIndex = i;
+                } else if (cell.includes('credit') && creditsCol === -1) {
+                    creditsCol = j;
+                    headerRowIndex = i;
+                } else if (cell.includes('grade') && cell.includes('point') && gradePointsCol === -1) {
+                    gradePointsCol = j;
+                    headerRowIndex = i;
+                }
+            }
+            
+            // If we found all three columns, we're good
+            if (courseCodeCol !== -1 && creditsCol !== -1 && gradePointsCol !== -1) {
+                console.log(`📍 Found headers at row ${headerRowIndex}: Course Code(${courseCodeCol}), Credits(${creditsCol}), Grade Points(${gradePointsCol})`);
+                break;
+            }
+        }
+        
+        // If we couldn't find proper headers, try to guess based on first few rows
+        if (headerRowIndex === -1) {
+            console.log('⚠️ No proper headers found, trying to guess column structure...');
+            // Assume first row is header or data, look for patterns
+            headerRowIndex = 0;
+            
+            // Look at first data row to determine structure
+            for (let i = 0; i < Math.min(3, data.length); i++) {
+                const row = data[i];
+                if (!Array.isArray(row) || row.length < 3) continue;
+                
+                // Look for course code pattern in first few columns
+                for (let j = 0; j < Math.min(3, row.length); j++) {
+                    const cell = String(row[j]).trim();
+                    if (/^[A-Z]{2,4}\d{3}$/i.test(cell)) {
+                        courseCodeCol = j;
+                        // Assume credits is next, grade points after that
+                        creditsCol = j + 1;
+                        gradePointsCol = j + 2;
+                        headerRowIndex = i;
+                        console.log(`🔍 Guessed structure: Course Code(${courseCodeCol}), Credits(${creditsCol}), Grade Points(${gradePointsCol})`);
+                        break;
+                    }
+                }
+                
+                if (courseCodeCol !== -1) break;
+            }
+        }
+        
+        if (courseCodeCol === -1 || creditsCol === -1 || gradePointsCol === -1) {
+            console.error('❌ Could not determine Excel file structure');
+            return;
+        }
+        
+        // Parse data rows
+        const seenCourses = new Set();
+        
+        for (let i = headerRowIndex + 1; i < data.length; i++) {
+            const row = data[i];
+            if (!Array.isArray(row) || row.length < Math.max(courseCodeCol, creditsCol, gradePointsCol) + 1) {
+                continue;
+            }
+            
+            const courseCode = String(row[courseCodeCol] || '').trim();
+            const creditsValue = row[creditsCol];
+            const gradePointsValue = row[gradePointsCol];
+            
+            // Skip if course code doesn't look valid
+            if (!courseCode || courseCode.toLowerCase().includes('summary') || courseCode.toLowerCase().includes('total')) {
+                continue;
+            }
+            
+            // Parse numeric values
+            const credits = parseFloat(creditsValue);
+            const gradePoints = parseFloat(gradePointsValue);
+            
+            // Validate values
+            if (isNaN(credits) || isNaN(gradePoints) || 
+                credits < 0 || credits > 10 || 
+                gradePoints < 0 || gradePoints > 4.0) {
+                console.log(`⚠️ Skipping invalid row: ${courseCode}, Credits: ${creditsValue}, Grade Points: ${gradePointsValue}`);
+                continue;
+            }
+            
+            const courseKey = `${courseCode}_${credits}_${gradePoints}`;
+            
+            if (!seenCourses.has(courseKey)) {
+                const courseData = {
+                    courseCode: courseCode.toUpperCase(),
+                    credits: credits,
+                    gradePoints: gradePoints,
+                    qualityPoints: credits * gradePoints,
+                    isManuallyAdded: false
+                };
+                
+                this.courses.push(courseData);
+                this.originalCourses.push({...courseData});
+                seenCourses.add(courseKey);
+                
+                console.log(`✅ Parsed course from Excel: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}`);
+            }
+        }
+        
+        console.log(`🎉 Excel parsing complete! Found ${this.courses.length} courses`);
+    }
+
+    /**
      * Calculate CGPA from parsed courses
      */
     calculateCGPA() {
@@ -432,25 +615,70 @@ class GradeSheetAnalyzer {
     }
 
     /**
-     * Apply perfect grades (4.0) to all courses
+     * Export course data to Excel file
      */
-    applyPerfectGrades() {
+    exportToExcel() {
         if (this.courses.length === 0) {
-            this.showError('No courses to update');
+            this.showError('No courses to export');
             return;
         }
 
-        // Set all grade points to 4.0
-        this.courses.forEach(course => {
-            course.gradePoints = 4.0;
-            course.qualityPoints = course.credits * 4.0;
-        });
+        try {
+            // Prepare data for Excel
+            const exportData = this.courses.map(course => ({
+                'Course Code': course.courseCode,
+                'Credits Earned': course.credits,
+                'Grade Points': course.gradePoints.toFixed(2),
+                'Quality Points': course.qualityPoints.toFixed(2),
+                'Type': course.isManuallyAdded ? 'Manual' : 'From Grade Sheet'
+            }));
 
-        // Update display
-        this.displayResults();
-        this.showSuccessMessage('⭐ Applied perfect grades (4.0) to all courses!');
-        
-        console.log('⭐ Applied perfect grades (4.0) to all courses');
+            // Add summary information
+            const currentCGPA = this.calculateOriginalCGPA();
+            const dreamCGPA = this.calculateCGPA();
+            const totalCredits = this.courses.reduce((sum, course) => sum + course.credits, 0);
+
+            const summaryData = [
+                {},
+                { 'Course Code': 'SUMMARY', 'Credits Earned': '', 'Grade Points': '', 'Quality Points': '', 'Type': '' },
+                { 'Course Code': 'Total Courses', 'Credits Earned': this.courses.length, 'Grade Points': '', 'Quality Points': '', 'Type': '' },
+                { 'Course Code': 'Total Credits', 'Credits Earned': totalCredits.toFixed(2), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
+                { 'Course Code': 'Current CGPA', 'Credits Earned': currentCGPA.toFixed(4), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
+                { 'Course Code': 'Dream CGPA', 'Credits Earned': dreamCGPA.toFixed(4), 'Grade Points': '', 'Quality Points': '', 'Type': '' }
+            ];
+
+            // Combine course data with summary
+            const finalData = [...exportData, ...summaryData];
+
+            // Create workbook
+            const ws = XLSX.utils.json_to_sheet(finalData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Course Analysis");
+
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 15 }, // Course Code
+                { wch: 12 }, // Credits Earned
+                { wch: 12 }, // Grade Points
+                { wch: 12 }, // Quality Points
+                { wch: 15 }  // Type
+            ];
+
+            // Generate filename with current date
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const filename = `should-i-retake-analysis-${dateStr}.xlsx`;
+
+            // Save the file
+            XLSX.writeFile(wb, filename);
+
+            this.showSuccessMessage('📊 Excel file exported successfully!');
+            console.log('📊 Course data exported to Excel:', filename);
+
+        } catch (error) {
+            console.error('Export error:', error);
+            this.showError('Failed to export to Excel. Please try again.');
+        }
     }
 
     /**

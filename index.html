@@ -23,7 +23,7 @@
                 <span class="icon">🎓</span>
                 Should I Retake?
             </h1>
-            <p>Upload your PDF grade sheet to extract course numbers and grade points</p>
+            <p>Upload your PDF grade sheet or Excel file to extract course numbers and grade points</p>
         </header>
 
         <!-- Upload Section -->
@@ -33,13 +33,13 @@
                     ☁️
                 </div>
                 <div class="upload-text">
-                    <h3>Drop your PDF here or click to browse</h3>
-                    <p>Supports PDF files up to 10MB</p>
+                    <h3>Drop your PDF or Excel file here or click to browse</h3>
+                    <p>Supports PDF and Excel files (.xlsx, .xls) up to 10MB</p>
                     <button class="upload-btn" type="button">
                         Choose File
                     </button>
                 </div>
-                <input id="fileInput" type="file" accept=".pdf" class="file-input">
+                <input id="fileInput" type="file" accept=".pdf,.xlsx,.xls" class="file-input">
             </div>
             
             <!-- Loading Indicator -->
@@ -79,8 +79,8 @@
                 <button id="resetBtn" class="control-btn reset-btn">
                     🔄 Reset to Original
                 </button>
-                <button id="applyPerfectBtn" class="control-btn perfect-btn">
-                    ⭐ Apply Perfect Grades (4.0)
+                <button id="exportBtn" class="control-btn export-btn">
+                    📊 Export to Excel
                 </button>
             </div>
 
@@ -154,7 +154,7 @@
                         <h3>Can I download what I created here?</h3>
                     </div>
                     <div class="faq-answer">
-                        <p>Currently no, but I am implementing a feature so that people can export their data to Excel and make changes at their own convenience.</p>
+                        <p>Yes, you can download your data in Excel format and make changes to it as needed. You can also upload your modified Excel file to restore your data.</p>
                     </div>
                 </div>
             </div>
@@ -170,6 +170,9 @@
 
     </div>
 
+    <!-- SheetJS Library for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <!-- Custom JavaScript -->
     <script src="config.js"></script>
     <script src="utils.js"></script>
