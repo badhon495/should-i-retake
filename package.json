@@ -1,0 +1,22 @@
+{
+  "name": "should-i-retake",
+  "version": "1.0.0",
+  "description": "Upload your gradesheet, change the grade for any course, and instantly see how your CGPA would improve. A simple tool to help you decide if retaking a course is worth the fee.",
+  "main": "index.html",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "serve-node": "npx http-server . -p 8000 -c-1"
+  },
+  "keywords": [
+    "grade",
+    "cgpa",
+    "pdf",
+    "parser",
+    "education"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
