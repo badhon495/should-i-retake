@@ -80,6 +80,7 @@
         
         .loader-content {
             text-align: center;
+            padding: 1rem;
         }
         
         .loader-content h1 {
@@ -90,6 +91,7 @@
             align-items: center;
             justify-content: center;
             gap: 1rem;
+            flex-wrap: wrap;
         }
         
         .loader-content .icon {
@@ -115,6 +117,47 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+        }
+        
+        /* Critical mobile styles */
+        @media (max-width: 768px) {
+            .loader-content h1 {
+                font-size: 2.2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .loader-content .icon {
+                font-size: 2.5rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .loader-content h1 {
+                font-size: 1.8rem;
+            }
+            
+            .loader-content .icon {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .loader-content h1 {
+                font-size: 1.6rem;
+            }
+            
+            .loader-content .icon {
+                font-size: 1.8rem;
+            }
         }
     </style>
     
