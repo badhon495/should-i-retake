@@ -5,12 +5,18 @@
     box-sizing: border-box;
 }
 
+/* Improve loading performance */
+html {
+    font-display: swap;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: #24273a;
     min-height: 100vh;
     line-height: 1.6;
     color: #cad3f5;
+    /* Remove any initial opacity/transition here since it's handled by the loader */
 }
 
 /* Container */

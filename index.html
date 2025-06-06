@@ -2,19 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <m        <!-- Header Section -->
-        <header class="header">
-            <h1>
-                <span class="icon">🎓</span>
-                Should I Retake?
-            </h1>
-            <p>Upload your PDF grade sheet and start analyzing your grades!</p>
-            <p style="margin-top: 1rem; font-size: 1rem; opacity: 0.8;">
-                <a href="https://badhon495.github.io/bracu-cgpa-calculator/" target="_blank" rel="noopener noreferrer" style="color: #7dc4e4; text-decoration: underline; font-weight: 500;">
-                    Calculate CGPA without uploading grade sheet
-                </a>
-            </p>
-        </header>
+    <meta name="viewport" content="width=device-width, initial-scal    
+    <!-- Custom Styles (backup loading) -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="animations.css">
+    
     <!-- SEO Meta Tags -->
     <title>Should I Retake? - CGPA Calculator & Grade Analysis Tool</title>
     <meta name="description" content="Upload your PDF grade sheet or Excel file to calculate your CGPA, analyze grades, and determine if you should retake courses. Free online tool for BRAC University students.">
@@ -43,9 +35,106 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
     
+    <!-- Critical CSS to prevent FOUC -->
+    <style>
+        /* Critical styles to prevent flash of unstyled content */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #24273a;
+            min-height: 100vh;
+            line-height: 1.6;
+            color: #cad3f5;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        body.loaded {
+            opacity: 1;
+        }
+        
+        .initial-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #24273a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: #cad3f5;
+        }
+        
+        .initial-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .loader-content {
+            text-align: center;
+        }
+        
+        .loader-content h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .loader-content .icon {
+            font-size: 3rem;
+        }
+        
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(202, 211, 245, 0.3);
+            border-left: 4px solid #cad3f5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+    </style>
+    
+    <!-- Preload fonts for better performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Preload critical CSS files -->
+    <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="animations.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- Fallback for browsers that don't support preload -->
+    <noscript>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="animations.css">
+    </noscript>
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
@@ -79,9 +168,33 @@
     </script>
 </head>
 <body>
+    <!-- Initial loading screen to prevent FOUC -->
+    <div class="initial-loader" id="initialLoader">
+        <div class="loader-content">
+            <h1>
+                <span class="icon">🎓</span>
+                Should I Retake?
+            </h1>
+            <div class="loader-spinner"></div>
+            <p>Loading your grade analysis tool...</p>
+        </div>
+    </div>
+
     <!-- Main Container -->
     <div class="container">
-        
+        <!-- Header Section -->
+        <header class="header">
+            <h1>
+                <span class="icon">🎓</span>
+                Should I Retake?
+            </h1>
+            <p>Upload your grade sheet and start analyzing it!</p>
+            <p style="margin-top: 1rem; font-size: 1rem; opacity: 0.8;">
+                <a href="https://badhon495.github.io/bracu-cgpa-calculator/" target="_blank" rel="noopener noreferrer" style="color: #7dc4e4; text-decoration: underline; font-weight: 500;">
+                    Calculate CGPA without uploading grade sheet
+                </a>
+            </p>
+        </header>
 
         <!-- Upload Section -->
         <div class="upload-card">
@@ -90,8 +203,8 @@
                     ☁️
                 </div>
                 <div class="upload-text">
-                    <h3>Drop your PDF or Excel file here or click to browse</h3>
-                    <p>Supports PDF and Excel files (.xlsx, .xls) up to 10MB</p>
+                    <h3>Drop your Grade Sheet or click to browse</h3>
+                    <p>Supports PDF and Excel files (.xlsx, .xls)</p>
                     <button class="upload-btn" type="button">
                         Choose File
                     </button>
@@ -196,5 +309,36 @@
     <script src="config.js"></script>
     <script src="utils.js"></script>
     <script src="script.js"></script>
+    
+    <!-- Loading state management -->
+    <script>
+        // Hide loader and show content when everything is loaded
+        function hideLoader() {
+            const loader = document.getElementById('initialLoader');
+            const body = document.body;
+            
+            if (loader && body) {
+                loader.classList.add('hidden');
+                body.classList.add('loaded');
+            }
+        }
+        
+        // Hide loader when DOM is ready and fonts are loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Give a small delay to ensure fonts are loaded
+                setTimeout(hideLoader, 100);
+            });
+        } else {
+            // DOM is already ready
+            setTimeout(hideLoader, 100);
+        }
+        
+        // Additional safety: hide loader when window is fully loaded
+        window.addEventListener('load', hideLoader);
+        
+        // Hide loader after maximum 3 seconds as fallback
+        setTimeout(hideLoader, 3000);
+    </script>
 </body>
 </html>

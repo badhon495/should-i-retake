@@ -1,3 +1,17 @@
+/* Animation performance optimizations */
+* {
+    will-change: auto;
+}
+
+/* Reduce animations on slower devices */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 /* Success message styles */
 .success-message {
     margin: 2rem 0;
