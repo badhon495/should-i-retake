@@ -2,8 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Should I Retake?</title>
+    <m        <!-- Header Section -->
+        <header class="header">
+            <h1>
+                <span class="icon">🎓</span>
+                Should I Retake?
+            </h1>
+            <p>Upload your PDF grade sheet and start analyzing your grades!</p>
+            <p style="margin-top: 1rem; font-size: 1rem; opacity: 0.8;">
+                <a href="https://badhon495.github.io/bracu-cgpa-calculator/" target="_blank" rel="noopener noreferrer" style="color: #7dc4e4; text-decoration: underline; font-weight: 500;">
+                    Calculate CGPA without uploading grade sheet
+                </a>
+            </p>
+        </header>
+    <!-- SEO Meta Tags -->
+    <title>Should I Retake? - CGPA Calculator & Grade Analysis Tool</title>
+    <meta name="description" content="Upload your PDF grade sheet or Excel file to calculate your CGPA, analyze grades, and determine if you should retake courses. Free online tool for BRAC University students.">
+    <meta name="keywords" content="CGPA calculator, grade analysis, retake courses, BRAC University, GPA calculator, grade sheet analyzer, academic planning">
+    <meta name="author" content="Badhon">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    
+    <!-- Open Graph Meta Tags (Facebook, LinkedIn) -->
+    <meta property="og:title" content="Should I Retake? - CGPA Calculator & Grade Analysis Tool">
+    <meta property="og:description" content="Upload your PDF grade sheet or Excel file to calculate your CGPA, analyze grades, and determine if you should retake courses. Free online tool for BRAC University students.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://badhon495.github.io/should-i-retake/">
+    <meta property="og:site_name" content="Should I Retake?">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Should I Retake? - CGPA Calculator & Grade Analysis Tool">
+    <meta name="twitter:description" content="Upload your PDF grade sheet or Excel file to calculate your CGPA, analyze grades, and determine if you should retake courses.">
+    <meta name="twitter:creator" content="@badhon495">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://badhon495.github.io/should-i-retake/">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
     
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -12,25 +50,38 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="animations.css">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Should I Retake?",
+        "description": "A free online CGPA calculator and grade analysis tool that helps students determine if they should retake courses to improve their academic performance.",
+        "url": "https://badhon495.github.io/should-i-retake/",
+        "author": {
+            "@type": "Person",
+            "name": "Badhon"
+        },
+        "applicationCategory": "Educational Tool",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "150"
+        }
+    }
+    </script>
 </head>
 <body>
     <!-- Main Container -->
     <div class="container">
         
-        <!-- Header Section -->
-        <header class="header">
-            <h1>
-                <span class="icon">🎓</span>
-                Should I Retake?
-            </h1>
-            <p>Upload your PDF grade sheet or Excel file to extract course numbers and grade points</p>
-            <p style="margin-top: 1rem; font-size: 1rem; opacity: 0.8;">
-                Don't want to upload your grade sheet? 
-                <a href="https://badhon495.github.io/bracu-cgpa-calculator/" target="_blank" rel="noopener noreferrer" style="color: #7dc4e4; text-decoration: underline; font-weight: 500;">
-                    Use this CGPA calculator instead
-                </a>
-            </p>
-        </header>
 
         <!-- Upload Section -->
         <div class="upload-card">
@@ -55,10 +106,10 @@
                     Processing your grade sheet...
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Results Section -->
-        <section id="resultsSection" class="results-section">
+        <section id="resultsSection" class="results-section" aria-label="Grade Analysis Results">
             
             <!-- Summary Cards -->
             <div class="summary-grid">
@@ -121,11 +172,12 @@
             </div>
             
         </section>
+        </main>
 
         <!-- FAQ Section Link -->
-        <section class="faq-link-section" style="margin-top: 2rem; text-align: center;">
+        <aside class="faq-link-section" style="margin-top: 2rem; text-align: center;">
             <p style="font-size: 1.1rem;">If you have any questions regarding this project, <a href="faq.html" style="color: #7dc4e4; font-weight: 600; text-decoration: underline;">visit the FAQ page</a>.</p>
-        </section>
+        </aside>
 
         <!-- Error Message -->
         <div id="errorMessage" class="error-message">

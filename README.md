@@ -15,7 +15,9 @@ A modern, client-side web application for analyzing PDF grade sheets. Extract co
 - **🔒 100% Client-Side Processing** - Your data never leaves your device
 - **📄 PDF Parsing** - Extract course codes, credits, and grade points automatically
 - **📊 CGPA Calculation** - Instant calculation of your current CGPA
+- **🔄 Duplicate Course Handling** - Automatically prioritizes retake courses marked with "(RP)"
 - **📱 Responsive Design** - Works perfectly on desktop, tablet, and mobile
+- **📊 Excel Support** - Import and export course data in Excel format
 
 ## 🚀 Quick Start
 
@@ -47,11 +49,57 @@ grade-sheet-analyzer/
 - **Grade Points**: Captures grade point values (0.00-4.00)
 - **Quality Points**: Automatically calculates (Credits × Grade Points)
 
+### Duplicate Course Handling with Retakes
+The application intelligently handles duplicate courses and prioritizes retake courses:
+
+- **Retake Detection**: Automatically detects courses marked with "(RP)" notation
+- **Multiple Formats Supported**: 
+  - `(RP)` - Standard format
+  - `( RP )` - Spaced format
+  - ` RP ` - Space-separated format
+  - `RP` - Standalone format
+- **Priority Logic**:
+  - Retake courses always take priority over original courses
+  - For multiple retakes of the same course, the one with the highest grade is kept
+  - Visual indicators distinguish retake courses in the UI
+- **Export Support**: Retake information is preserved in Excel exports
+
+#### Example Scenarios:
+```
+CSE110 Programming I     3.00  C+  2.30  (Original)
+CSE110 Programming I (RP) 3.00  A   4.00  (Retake - This will be kept)
+
+MAT110 Calculus I (RP)   3.00  B+  3.30  (First Retake)
+MAT110 Calculus I (RP)   3.00  A-  3.70  (Second Retake - This will be kept)
+MAT110 Calculus I        3.00  D   1.00  (Original - Ignored)
+```
+
 ### CGPA Calculation
 ```javascript
 CGPA = Total Quality Points / Total Credits
 ```
 
+
+## 🧪 Testing
+
+The project includes comprehensive test files to validate the duplicate course handling functionality:
+
+### Test Files
+- **`test-duplicate-handling.html`** - Basic duplicate course testing with (RP) notation
+- **`test-edge-cases.html`** - Advanced edge case testing including:
+  - Multiple retakes of the same course
+  - Different (RP) notation formats
+  - Mixed ordering of retakes and originals
+
+### Running Tests
+1. Start a local server (optional but recommended):
+   ```bash
+   python3 -m http.server 8000
+   ```
+2. Open the test files in your browser:
+   - `http://localhost:8000/test-duplicate-handling.html`
+   - `http://localhost:8000/test-edge-cases.html`
+3. Click the test buttons to validate functionality
 
 ## 🤝 Contributing
 

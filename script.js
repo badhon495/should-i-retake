@@ -242,7 +242,7 @@ class GradeSheetAnalyzer {
         
         console.log(`📋 Processing ${lines.length} lines and ${words.length} words`);
         
-        const seenCourses = new Set(); // To avoid duplicates
+        const courseMap = new Map(); // To handle duplicates with RP priority
         
         // Method 1: Line-by-line parsing
         for (let i = 0; i < lines.length; i++) {
@@ -262,6 +262,16 @@ class GradeSheetAnalyzer {
                 const courseCode = courseMatch[1];
                 console.log(`🎯 Found course code: ${courseCode}`);
                 
+                // Check if this line contains "(RP)" notation in various formats
+                const isRetake = line.includes('(RP)') || 
+                                line.includes('( RP )') || 
+                                line.includes(' RP ') || 
+                                line.includes(' RP') ||
+                                /\bRP\b/.test(line); // Word boundary for standalone RP
+                if (isRetake) {
+                    console.log(`🔄 Found retake course with (RP): ${courseCode}`);
+                }
+                
                 // Extract all decimal numbers from the line
                 const numbers = line.match(/\d+\.\d+/g);
                 console.log(`🔢 Numbers found in line: ${numbers ? numbers.join(', ') : 'none'}`);
@@ -271,26 +281,20 @@ class GradeSheetAnalyzer {
                     const credits = parseFloat(numbers[0]);
                     const gradePoints = parseFloat(numbers[numbers.length - 1]);
                     
-                    console.log(`📊 Attempting to parse - Course: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}`);
+                    console.log(`📊 Attempting to parse - Course: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}, Retake: ${isRetake}`);
                     
                     // Validate that we have reasonable values
                     if (credits >= 0 && credits <= 10 && gradePoints >= 0 && gradePoints <= 4.0) {
-                        const courseKey = `${courseCode}_${credits}_${gradePoints}`;
+                        const courseData = {
+                            courseCode: courseCode,
+                            credits: credits,
+                            gradePoints: gradePoints,
+                            qualityPoints: credits * gradePoints,
+                            isRetake: isRetake
+                        };
                         
-                        if (!seenCourses.has(courseKey)) {
-                            const courseData = {
-                                courseCode: courseCode,
-                                credits: credits,
-                                gradePoints: gradePoints,
-                                qualityPoints: credits * gradePoints
-                            };
-                            this.courses.push(courseData);
-                            this.originalCourses.push({...courseData}); // Store original values
-                            seenCourses.add(courseKey);
-                            console.log(`✅ Successfully parsed course: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}`);
-                        } else {
-                            console.log(`⚠️ Duplicate course found: ${courseCode}`);
-                        }
+                        // Handle duplicates by prioritizing retake courses
+                        this.handleDuplicateCourse(courseMap, courseData);
                     } else {
                         console.log(`❌ Invalid values - Credits: ${credits}, Grade Points: ${gradePoints}`);
                     }
@@ -299,13 +303,56 @@ class GradeSheetAnalyzer {
         }
         
         // Method 2: Word-by-word parsing if line parsing didn't work well
-        if (this.courses.length === 0) {
+        if (courseMap.size === 0) {
             console.log('🔄 Line parsing found no courses, trying word-by-word parsing...');
-            this.parseWordByWord(words, seenCourses);
+            this.parseWordByWord(words, courseMap);
         }
+        
+        // Convert the course map to arrays, with retake courses taking priority
+        this.courses = Array.from(courseMap.values());
+        this.originalCourses = this.courses.map(course => ({...course})); // Store original values
         
         console.log(`🎉 Parsing complete! Found ${this.courses.length} courses total`);
         console.log('📋 Final parsed courses:', this.courses);
+    }
+
+    /**
+     * Handle duplicate courses by prioritizing retake courses with (RP) notation
+     * For multiple retakes, prioritize the one with the highest grade points
+     */
+    handleDuplicateCourse(courseMap, newCourseData) {
+        const courseCode = newCourseData.courseCode;
+        
+        if (courseMap.has(courseCode)) {
+            const existingCourse = courseMap.get(courseCode);
+            
+            // If the new course is a retake and the existing one is not, replace it
+            if (newCourseData.isRetake && !existingCourse.isRetake) {
+                console.log(`🔄 Replacing original course ${courseCode} with retake version`);
+                courseMap.set(courseCode, newCourseData);
+            } 
+            // If the existing course is a retake and the new one is not, keep the existing one
+            else if (existingCourse.isRetake && !newCourseData.isRetake) {
+                console.log(`⚠️ Keeping existing retake course ${courseCode}, ignoring original`);
+            }
+            // If both are retakes, keep the one with higher grade points (latest/better grade)
+            else if (existingCourse.isRetake && newCourseData.isRetake) {
+                if (newCourseData.gradePoints > existingCourse.gradePoints) {
+                    console.log(`🔄 Replacing existing retake ${courseCode} (${existingCourse.gradePoints}) with better retake (${newCourseData.gradePoints})`);
+                    courseMap.set(courseCode, newCourseData);
+                } else {
+                    console.log(`⚠️ Keeping existing retake ${courseCode} with better/equal grade (${existingCourse.gradePoints} >= ${newCourseData.gradePoints})`);
+                }
+            }
+            // If both are originals, keep the first one found
+            else {
+                console.log(`⚠️ Duplicate original course found for ${courseCode}, keeping first occurrence`);
+            }
+        } else {
+            // First occurrence of this course
+            courseMap.set(courseCode, newCourseData);
+            console.log(`✅ Successfully parsed course: ${courseCode}, Credits: ${newCourseData.credits}, Grade Points: ${newCourseData.gradePoints}, Retake: ${newCourseData.isRetake || false}`);
+        }
     }
     
     /**
@@ -334,13 +381,27 @@ class GradeSheetAnalyzer {
     /**
      * Alternative parsing method using word-by-word analysis
      */
-    parseWordByWord(words, seenCourses) {
+    parseWordByWord(words, courseMap) {
         for (let i = 0; i < words.length - 4; i++) {
             const word = words[i];
             
             // Check if current word is a course code
             if (/^[A-Z]{2,4}\d{3}$/.test(word)) {
                 console.log(`🎯 Found course code (word method): ${word}`);
+                
+                // Check for (RP) notation in surrounding words with enhanced detection
+                const contextWords = words.slice(Math.max(0, i - 3), i + 10);
+                const isRetake = contextWords.some(w => 
+                    w.includes('(RP)') || 
+                    w.includes('( RP )') || 
+                    w.includes(' RP ') || 
+                    w.includes(' RP') ||
+                    w === 'RP' ||
+                    /\bRP\b/.test(w)
+                );
+                if (isRetake) {
+                    console.log(`🔄 Found retake course with (RP) in word method: ${word}`);
+                }
                 
                 // Look for two decimal numbers in the next few words
                 const nextWords = words.slice(i + 1, i + 10); // Look ahead up to 10 words
@@ -361,21 +422,17 @@ class GradeSheetAnalyzer {
                         const gradePoints = numbers[j + 1];
                         
                         if (credits >= 0 && credits <= 10 && gradePoints >= 0 && gradePoints <= 4.0) {
-                            const courseKey = `${word}_${credits}_${gradePoints}`;
+                            const courseData = {
+                                courseCode: word,
+                                credits: credits,
+                                gradePoints: gradePoints,
+                                qualityPoints: credits * gradePoints,
+                                isRetake: isRetake
+                            };
                             
-                            if (!seenCourses.has(courseKey)) {
-                                const courseData = {
-                                    courseCode: word,
-                                    credits: credits,
-                                    gradePoints: gradePoints,
-                                    qualityPoints: credits * gradePoints
-                                };
-                                this.courses.push(courseData);
-                                this.originalCourses.push({...courseData}); // Store original values
-                                seenCourses.add(courseKey);
-                                console.log(`✅ Word method - parsed course: ${word}, Credits: ${credits}, Grade Points: ${gradePoints}`);
-                                break; // Found valid pair, move to next course
-                            }
+                            // Handle duplicates by prioritizing retake courses
+                            this.handleDuplicateCourse(courseMap, courseData);
+                            break; // Found valid pair, move to next course
                         }
                     }
                 }
@@ -465,7 +522,7 @@ class GradeSheetAnalyzer {
         }
         
         // Parse data rows
-        const seenCourses = new Set();
+        const courseMap = new Map();
         
         for (let i = headerRowIndex + 1; i < data.length; i++) {
             const row = data[i];
@@ -476,6 +533,16 @@ class GradeSheetAnalyzer {
             const courseCode = String(row[courseCodeCol] || '').trim();
             const creditsValue = row[creditsCol];
             const gradePointsValue = row[gradePointsCol];
+            
+            // Check if any cell in this row contains (RP) notation with enhanced detection
+            const isRetake = row.some(cell => {
+                const cellStr = String(cell || '').toLowerCase();
+                return cellStr.includes('(rp)') || 
+                       cellStr.includes('( rp )') || 
+                       cellStr.includes(' rp ') || 
+                       cellStr.includes(' rp') ||
+                       /\brp\b/.test(cellStr); // Word boundary for standalone rp
+            });
             
             // Skip if course code doesn't look valid
             if (!courseCode || courseCode.toLowerCase().includes('summary') || courseCode.toLowerCase().includes('total')) {
@@ -494,24 +561,22 @@ class GradeSheetAnalyzer {
                 continue;
             }
             
-            const courseKey = `${courseCode}_${credits}_${gradePoints}`;
+            const courseData = {
+                courseCode: courseCode.toUpperCase(),
+                credits: credits,
+                gradePoints: gradePoints,
+                qualityPoints: credits * gradePoints,
+                isManuallyAdded: false,
+                isRetake: isRetake
+            };
             
-            if (!seenCourses.has(courseKey)) {
-                const courseData = {
-                    courseCode: courseCode.toUpperCase(),
-                    credits: credits,
-                    gradePoints: gradePoints,
-                    qualityPoints: credits * gradePoints,
-                    isManuallyAdded: false
-                };
-                
-                this.courses.push(courseData);
-                this.originalCourses.push({...courseData});
-                seenCourses.add(courseKey);
-                
-                console.log(`✅ Parsed course from Excel: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}`);
-            }
+            // Handle duplicates by prioritizing retake courses
+            this.handleDuplicateCourse(courseMap, courseData);
         }
+        
+        // Convert the course map to arrays, with retake courses taking priority
+        this.courses = Array.from(courseMap.values());
+        this.originalCourses = this.courses.map(course => ({...course}));
         
         console.log(`🎉 Excel parsing complete! Found ${this.courses.length} courses`);
     }
@@ -630,7 +695,7 @@ class GradeSheetAnalyzer {
                 'Credits Earned': course.credits,
                 'Grade Points': course.gradePoints.toFixed(2),
                 'Quality Points': course.qualityPoints.toFixed(2),
-                'Type': course.isManuallyAdded ? 'Manual' : 'From Grade Sheet'
+                'Type': course.isManuallyAdded ? 'Manual' : (course.isRetake ? 'Retake (RP)' : 'From Grade Sheet')
             }));
 
             // Add summary information
@@ -701,6 +766,7 @@ class GradeSheetAnalyzer {
                 <td class="course-code">
                     ${course.courseCode}
                     ${course.isManuallyAdded ? '<span class="manual-course-tag">Manual</span>' : ''}
+                    ${course.isRetake ? '<span class="retake-course-tag">(RP)</span>' : ''}
                 </td>
                 <td>${course.credits.toFixed(2)}</td>
                 <td>

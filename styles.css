@@ -594,6 +594,25 @@ body {
     box-shadow: 0 4px 8px rgba(198, 160, 246, 0.4);
 }
 
+.retake-course-tag {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #7dc4e4, #91d7e3);
+    color: #1e2030;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    box-shadow: 0 2px 4px rgba(125, 196, 228, 0.3);
+    transition: all 0.2s ease;
+}
+
+.retake-course-tag:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(125, 196, 228, 0.4);
+}
+
 .delete-course-btn {
     background: linear-gradient(135deg, #ed8796, #f5a97f);
     color: #ffffff;
@@ -835,6 +854,12 @@ body {
     }
     
     .manual-course-tag {
+        display: block;
+        margin: 0.25rem 0 0 0;
+        text-align: center;
+    }
+    
+    .retake-course-tag {
         display: block;
         margin: 0.25rem 0 0 0;
         text-align: center;
