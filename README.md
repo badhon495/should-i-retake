@@ -28,16 +28,15 @@ A modern, client-side web application for analyzing PDF grade sheets. Extract co
 ## Project Structure
 
 ```
-grade-sheet-analyzer/
-├── index.html          # Main HTML file
-├── styles.css          # Main stylesheet
-├── animations.css      # Animation styles
-├── script.js           # Main JavaScript logic
-├── config.js           # Configuration settings
-├── utils.js            # Utility functions
-├── package.json        # Project configuration
-├── README.md           # Project documentation
-└── grade-sheet-web.pdf # Sample grade sheet
+📁 should-i-retake/
+├── 📄 index.html          (Main HTML file - optimized)
+├── 📄 script.js           (Main JavaScript - complete functionality)
+├── 📄 styles.css          (Main stylesheet - cleaned)
+├── 📄 animations.css      (Animation styles - optimized)
+├── 📄 faq.html            (FAQ page - enhanced)
+├── 📄 README.md           (Documentation)
+├── 📄 LICENSE             (License file)
+└── 📄 .gitignore          (Git ignore rules)
 ```
 
 ## Features in Detail

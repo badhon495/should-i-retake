@@ -5,12 +5,18 @@
     box-sizing: border-box;
 }
 
+/* Improve loading performance */
+html {
+    font-display: swap;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #24273a;
     min-height: 100vh;
     line-height: 1.6;
-    color: #333;
+    color: #cad3f5;
+    /* Remove any initial opacity/transition here since it's handled by the loader */
 }
 
 /* Container */
@@ -24,7 +30,7 @@ body {
 .header {
     text-align: center;
     margin-bottom: 3rem;
-    color: white;
+    color: #cad3f5;
 }
 
 .header h1 {
@@ -43,77 +49,105 @@ body {
 
 .header p {
     font-size: 1.25rem;
+    line-height: 1.5;
     opacity: 0.9;
     font-weight: 300;
+    justify-content: center;
+}
+
+/* Simple Calculator Button */
+.simple-calculator-btn {
+    background: linear-gradient(135deg, #7dc4e4, #91d7e3);
+    color: #1e2030;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(125, 196, 228, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.simple-calculator-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(125, 196, 228, 0.4);
+}
+
+.simple-calculator-btn:active {
+    transform: translateY(0);
 }
 
 /* Main upload card */
 .upload-card {
-    background: white;
+    background: #1e2030;
     border-radius: 24px;
     padding: 4rem 3rem;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
     margin-bottom: 2rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #363a4f;
 }
 
 .upload-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
 }
 
 /* Upload area */
 .upload-area {
-    border: 3px dashed #e1e5e9;
+    border: 3px dashed #5b6078;
     border-radius: 16px;
     padding: 4rem 2rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: #fafbfc;
+    background: #181926;
 }
 
 .upload-area:hover {
-    border-color: #667eea;
-    background: #f8f9ff;
+    border-color: #8aadf4;
+    background: #1e2030;
     transform: translateY(-2px);
 }
 
 .upload-area.dragover {
-    border-color: #667eea;
-    background: #f0f4ff;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #8aadf4;
+    background: #1e2030;
+    box-shadow: 0 0 0 4px rgba(138, 173, 244, 0.2);
 }
 
 .upload-icon {
     width: 80px;
     height: 80px;
     margin: 0 auto 2rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #8aadf4, #c6a0f6);
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #1e2030;
     font-size: 2rem;
 }
 
 .upload-text h3 {
     font-size: 1.5rem;
-    color: #2d3748;
+    color: #cad3f5;
     margin-bottom: 0.5rem;
     font-weight: 600;
 }
 
 .upload-text p {
-    color: #718096;
+    color: #b8c0e0;
     font-size: 1rem;
     margin-bottom: 2rem;
 }
 
 .upload-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
+    background: linear-gradient(135deg, #8aadf4, #c6a0f6);
+    color: #1e2030;
     border: none;
     padding: 1rem 2rem;
     border-radius: 12px;
@@ -121,12 +155,12 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(138, 173, 244, 0.3);
 }
 
 .upload-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 25px rgba(138, 173, 244, 0.4);
 }
 
 .file-input {
@@ -147,19 +181,20 @@ body {
 .loading-content {
     display: inline-flex;
     align-items: center;
-    background: white;
+    background: #1e2030;
+    color: #cad3f5;
     padding: 1rem 2rem;
-    border-radius: 50px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    color: #667eea;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    border: 1px solid #363a4f;
     font-weight: 600;
 }
 
 .spinner {
     width: 24px;
     height: 24px;
-    border: 3px solid #e1e5e9;
-    border-top: 3px solid #667eea;
+    border: 3px solid #5b6078;
+    border-top: 3px solid #8aadf4;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-right: 0.75rem;
@@ -168,12 +203,6 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-/* Test button */
-.test-section {
-    text-align: center;
-    margin-top: 2rem;
 }
 
 /* Results section */
@@ -189,18 +218,19 @@ body {
 /* Summary cards */
 .summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
 .summary-card {
-    background: white;
+    background: #1e2030;
     padding: 2rem;
     border-radius: 16px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
     text-align: center;
     transition: transform 0.3s ease;
+    border: 1px solid #363a4f;
 }
 
 .summary-card:hover {
@@ -208,7 +238,7 @@ body {
 }
 
 .summary-card h3 {
-    color: #718096;
+    color: #b8c0e0;
     font-size: 0.9rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -222,21 +252,132 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.summary-card:nth-child(1) .value { color: #667eea; }
-.summary-card:nth-child(2) .value { color: #48bb78; }
-.summary-card:nth-child(3) .value { color: #ed8936; }
+.summary-card:nth-child(1) .value { color: #8aadf4; }
+.summary-card:nth-child(2) .value { color: #a6da95; }
+.summary-card:nth-child(3) .value { color: #f5a97f; }
 
-/* Course table */
+/* Dream CGPA and Controls styling */
+.summary-card.dream-cgpa {
+    background: linear-gradient(135deg, #c6a0f6, #f5bde6);
+    color: #1e2030;
+    border: 1px solid #c6a0f6;
+}
+
+.summary-card.dream-cgpa h3 {
+    color: #1e2030;
+    opacity: 0.8;
+}
+
+.summary-card .value.dream {
+    color: #1e2030;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Controls section */
+.controls-section {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #1e2030;
+}
+
+.reset-btn {
+    background: linear-gradient(135deg, #f5a97f, #ee99a0);
+    box-shadow: 0 4px 15px rgba(245, 169, 127, 0.3);
+}
+
+.reset-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 169, 127, 0.4);
+}
+
+.export-btn {
+    background: linear-gradient(135deg, #a6da95, #94e2d5);
+    box-shadow: 0 4px 15px rgba(166, 218, 149, 0.3);
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(166, 218, 149, 0.4);
+}
+
+/* Editable grade points */
+.grade-input {
+    width: 80px;
+    padding: 0.5rem;
+    border: 2px solid #5b6078;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    background: #181926;
+    color: #cad3f5;
+    transition: all 0.3s ease;
+}
+
+/* Remove spinner arrows from number inputs */
+.grade-input::-webkit-outer-spin-button,
+.grade-input::-webkit-inner-spin-button,
+.credits-input::-webkit-outer-spin-button,
+.credits-input::-webkit-inner-spin-button,
+.grade-points-input::-webkit-outer-spin-button,
+.grade-points-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+.grade-input[type=number],
+.credits-input[type=number],
+.grade-points-input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.grade-input:focus {
+    outline: none;
+    border-color: #8aadf4;
+    background: #1e2030;
+    box-shadow: 0 0 0 3px rgba(138, 173, 244, 0.2);
+}
+
+.grade-input:invalid {
+    border-color: #ed8796;
+    background: #1e2030;
+}
+
+.editable-hint {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-weight: 400;
+    color: #b8c0e0;
+}
+
+/* Table card */
 .table-card {
-    background: white;
+    background: #1e2030;
     border-radius: 16px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
     overflow: hidden;
+    border: 1px solid #363a4f;
 }
 
 .table-header {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
+    background: linear-gradient(135deg, #8aadf4, #c6a0f6);
+    color: #1e2030;
     padding: 1.5rem 2rem;
 }
 
@@ -255,30 +396,151 @@ body {
 }
 
 .course-table th {
-    background: #f8f9fa;
+    background: #181926;
     padding: 1rem 1.5rem;
-    text-align: left;
+    text-align: center;
     font-weight: 600;
-    color: #495057;
+    color: #cad3f5;
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #5b6078;
 }
 
 .course-table td {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid #f1f3f5;
-    color: #495057;
+    border-bottom: 1px solid #5b6078;
+    color: #cad3f5;
+    text-align: center;
 }
 
 .course-table tbody tr:hover {
-    background: #f8f9ff;
+    background: #181926;
 }
 
 .course-table .course-code {
     font-weight: 600;
-    color: #667eea;
+    color: #8aadf4;
+}
+
+/* Quality Points Cell Layout */
+.quality-points {
+    position: relative;
+    text-align: center;
+    min-width: 120px;
+    vertical-align: middle;
+}
+
+.quality-points-value {
+    display: inline;
+    vertical-align: middle;
+}
+
+/* Add Course Simple Button */
+.add-course-section {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.add-course-simple-btn {
+    background: linear-gradient(135deg, #a6da95, #94e2d5);
+    color: #1e2030;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(166, 218, 149, 0.3);
+    margin: 0 auto;
+}
+
+.add-course-simple-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(166, 218, 149, 0.4);
+}
+
+.add-course-simple-btn:active {
+    transform: translateY(0);
+}
+
+/* Editable table row styles */
+.editable-row {
+    background: rgba(166, 218, 149, 0.1);
+}
+
+.editable-row td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #5b6078;
+    color: #cad3f5;
+    vertical-align: middle;
+}
+
+.editable-row input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 2px solid #5b6078;
+    border-radius: 8px;
+    background: #181926;
+    color: #cad3f5;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.editable-row input:focus {
+    outline: none;
+    border-color: #8aadf4;
+    background: #1e2030;
+    box-shadow: 0 0 0 3px rgba(138, 173, 244, 0.2);
+}
+
+.editable-row .quality-points-preview {
+    font-weight: 600;
+    color: #a6da95;
+    font-size: 1rem;
+}
+
+.editable-row .save-cancel-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.save-btn, .cancel-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #a6da95, #94e2d5);
+    color: #1e2030;
+    box-shadow: 0 2px 4px rgba(166, 218, 149, 0.3);
+}
+
+.save-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(166, 218, 149, 0.4);
+}
+
+.cancel-btn {
+    background: linear-gradient(135deg, #ed8796, #f5a97f);
+    color: #1e2030;
+    box-shadow: 0 2px 4px rgba(237, 135, 150, 0.3);
+}
+
+.cancel-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(237, 135, 150, 0.4);
 }
 
 /* Error message */
@@ -292,9 +554,9 @@ body {
 }
 
 .error-content {
-    background: #fed7d7;
-    border: 1px solid #feb2b2;
-    color: #c53030;
+    background: #1e2030;
+    border: 1px solid #ed8796;
+    color: #ed8796;
     padding: 1rem 1.5rem;
     border-radius: 12px;
     text-align: center;
@@ -320,28 +582,221 @@ body {
 }
 
 .toast-info {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #8aadf4, #c6a0f6);
+    color: #1e2030;
 }
 
 .toast-success {
-    background: linear-gradient(135deg, #48bb78, #38a169);
+    background: linear-gradient(135deg, #a6da95, #94e2d5);
+    color: #1e2030;
 }
 
 .toast-error {
-    background: linear-gradient(135deg, #f56565, #e53e3e);
+    background: linear-gradient(135deg, #ed8796, #ee99a0);
+    color: #1e2030;
 }
 
 .toast-warning {
-    background: linear-gradient(135deg, #ed8936, #dd6b20);
+    background: linear-gradient(135deg, #f5a97f, #eed49f);
+    color: #1e2030;
 }
 
-/* Footer */
-.footer {
+/* Manual Course Tags and Delete Buttons */
+.manual-course-tag {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #c6a0f6, #f5a97f);
+    color: #1e2030;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    box-shadow: 0 2px 4px rgba(198, 160, 246, 0.3);
+    transition: all 0.2s ease;
+}
+
+.manual-course-tag:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(198, 160, 246, 0.4);
+}
+
+.retake-course-tag {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #7dc4e4, #91d7e3);
+    color: #1e2030;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    box-shadow: 0 2px 4px rgba(125, 196, 228, 0.3);
+    transition: all 0.2s ease;
+}
+
+.retake-course-tag:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(125, 196, 228, 0.4);
+}
+
+.delete-course-btn {
+    background: linear-gradient(135deg, #ed8796, #f5a97f);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    font-weight: 600;
+    min-width: 60px;
+    box-shadow: 0 2px 4px rgba(237, 135, 150, 0.3);
+    margin: 0 auto;
+    display: block;
+}
+
+.delete-course-btn:hover {
+    background: linear-gradient(135deg, #ee99a0, #f4dbd6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(237, 135, 150, 0.4);
+    color: #24273a;
+}
+
+.delete-course-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(237, 135, 150, 0.3);
+}
+
+/* Actions Column */
+.actions-column {
     text-align: center;
-    color: white;
+    width: 80px;
+    min-width: 80px;
+    padding: 0.75rem 0.5rem;
+}
+
+/* Course Row Hover Effect for Manual Courses */
+.course-table tbody tr.manual-course:hover {
+    background: rgba(198, 160, 246, 0.1);
+    transition: background 0.2s ease;
+}
+
+/* FAQ Section */
+.faq-section {
+    background: #1e2030;
+    border-radius: 20px;
+    padding: 2rem;
     margin-top: 3rem;
-    opacity: 0.8;
-    font-size: 0.9rem;
+    border: 1px solid #5b6078;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.faq-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.faq-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #cad3f5;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    background: #181926;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #5b6078;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: #8aadf4;
+}
+
+.faq-question {
+    background: linear-gradient(135deg, #8aadf4, #c6a0f6);
+    padding: 1.25rem 1.5rem;
+    margin: 0;
+}
+
+.faq-question h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e2030;
+    margin: 0;
+    letter-spacing: 0.025em;
+}
+
+.faq-answer {
+    padding: 1.5rem;
+    background: #181926;
+}
+
+.faq-answer p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #cad3f5;
+    margin: 0;
+    opacity: 0.95;
+}
+
+.faq-answer a {
+    color: #8aadf4;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.faq-answer a:hover {
+    color: #c6a0f6;
+    border-bottom-color: #c6a0f6;
+    transform: translateY(-1px);
+}
+
+/* FAQ Mobile Responsiveness */
+@media (max-width: 768px) {
+    .faq-section {
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border-radius: 16px;
+    }
+    
+    .faq-header h2 {
+        font-size: 2rem;
+        gap: 0.5rem;
+    }
+    
+    .faq-question {
+        padding: 1rem 1.25rem;
+    }
+    
+    .faq-question h3 {
+        font-size: 1.1rem;
+    }
+    
+    .faq-answer {
+        padding: 1.25rem;
+    }
+    
+    .faq-answer p {
+        font-size: 0.95rem;
+    }
 }
 
 /* Responsive design */
@@ -351,49 +806,250 @@ body {
     }
     
     .header h1 {
+        font-size: 2.2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .header .icon {
         font-size: 2.5rem;
+    }
+    
+    .header p {
+        font-size: 0.9rem;
+        line-height: 1.5;
     }
     
     .upload-card {
         padding: 2rem 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 16px;
     }
     
     .upload-area {
-        padding: 2rem 1rem;
-    }
-    
-    .summary-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .course-table {
-        font-size: 0.9rem;
-    }
-    
-    .course-table th,
-    .course-table td {
-        padding: 0.75rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .header h1 {
-        font-size: 2rem;
-        flex-direction: column;
-        gap: 0.5rem;
+        padding: 2.5rem 1rem;
+        border-radius: 12px;
     }
     
     .upload-icon {
         width: 60px;
         height: 60px;
         font-size: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
     }
     
     .upload-text h3 {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .upload-text p {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .upload-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+    
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .summary-card {
+        padding: 1.25rem;
+        border-radius: 12px;
+    }
+    
+    .summary-card h3 {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
     }
     
     .summary-card .value {
+        font-size: 1.8rem;
+    }
+    
+    .controls-section {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin: 1.5rem 0;
+    }
+    
+    .control-btn {
+        width: 100%;
+        padding: 0.8rem 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .table-card {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .course-table {
+        min-width: 600px;
+        font-size: 0.85rem;
+    }
+    
+    .course-table th,
+    .course-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .course-table th {
+        font-size: 0.8rem;
+    }
+    
+    .add-course-simple-btn {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .error-message {
+        margin: 1rem;
+        border-radius: 12px;
+    }
+    
+    .error-content {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .simple-calculator-btn {
+        padding: 0.7rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0.75rem;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+        gap: 0.5rem;
+    }
+    
+    .header .icon {
         font-size: 2rem;
+    }
+    
+    .header p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .upload-card {
+        padding: 1.5rem 1rem;
+        border-radius: 12px;
+    }
+    
+    .upload-area {
+        padding: 2rem 0.75rem;
+    }
+    
+    .upload-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .upload-text h3 {
+        font-size: 1.1rem;
+        line-height: 1.3;
+    }
+    
+    .upload-text p {
+        font-size: 0.85rem;
+    }
+    
+    .summary-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .summary-card {
+        padding: 1rem;
+        text-align: center;
+    }
+    
+    .summary-card h3 {
+        font-size: 0.85rem;
+    }
+    
+    .summary-card .value {
+        font-size: 1.6rem;
+    }
+    
+    .course-table {
+        min-width: 500px;
+        font-size: 0.8rem;
+    }
+    
+    .course-table th,
+    .course-table td {
+        padding: 0.6rem 0.4rem;
+    }
+    
+    .manual-course-tag,
+    .retake-course-tag {
+        display: block;
+        margin: 0.25rem 0 0 0;
+        text-align: center;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+    
+    .delete-course-btn {
+        width: auto;
+        margin: 0 auto;
+        min-width: 45px;
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .actions-column {
+        width: 55px;
+        min-width: 55px;
+        padding: 0.4rem 0.2rem;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .header .icon {
+        font-size: 1.8rem;
+    }
+    
+    .upload-text h3 {
+        font-size: 1rem;
+    }
+    
+    .summary-card .value {
+        font-size: 1.4rem;
+    }
+    
+    .course-table {
+        min-width: 450px;
+        font-size: 0.75rem;
     }
 }

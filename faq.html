@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>FAQ - Should I Retake? | Frequently Asked Questions</title>
+    <meta name="description" content="Find answers to frequently asked questions about the Should I Retake CGPA calculator. Learn about data privacy, features, and how to use the grade analysis tool.">
+    <meta name="keywords" content="CGPA calculator FAQ, grade analysis questions, Should I Retake help, BRAC University tools">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="FAQ - Should I Retake? | Frequently Asked Questions">
+    <meta property="og:description" content="Find answers to frequently asked questions about the Should I Retake CGPA calculator and grade analysis tool.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://badhon495.github.io/should-i-retake/faq.html">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://badhon495.github.io/should-i-retake/faq.html">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="animations.css">
+    
+    <style>
+        /* FAQ specific overrides */
+        .faq-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .faq-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #cad3f5;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .faq-header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .faq-header .icon {
+            font-size: 3rem;
+        }
+        
+        .faq-header p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .faq-item {
+            background: rgba(54, 58, 79, 0.8);
+            border: 1px solid rgba(138, 173, 244, 0.2);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            animation: slideInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .faq-item:nth-child(1) { animation-delay: 0.1s; }
+        .faq-item:nth-child(2) { animation-delay: 0.2s; }
+        .faq-item:nth-child(3) { animation-delay: 0.3s; }
+        .faq-item:nth-child(4) { animation-delay: 0.4s; }
+        .faq-item:nth-child(5) { animation-delay: 0.5s; }
+        
+        .faq-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(138, 173, 244, 0.15);
+            border-color: rgba(138, 173, 244, 0.4);
+        }
+        
+        .faq-question {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(138, 173, 244, 0.1);
+        }
+        
+        .faq-question h3 {
+            font-size: 1.3rem;
+            margin: 0;
+            color: #000000;
+            font-weight: 600;
+        }
+        
+        .faq-answer {
+            padding: 1.5rem;
+        }
+        
+        .faq-answer p {
+            font-size: 1rem;
+            margin: 0;
+            color: #cad3f5;
+            line-height: 1.6;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 3rem;
+            animation: fadeIn 1s ease-out 0.5s;
+            animation-fill-mode: both;
+        }
+        
+        .back-link a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #8aadf4;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(138, 173, 244, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: rgba(138, 173, 244, 0.1);
+        }
+        
+        .back-link a:hover {
+            background: rgba(138, 173, 244, 0.2);
+            border-color: rgba(138, 173, 244, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        @media (max-width: 768px) {
+            .faq-container {
+                padding: 0 1rem;
+            }
+            
+            .faq-header h1 {
+                font-size: 2.2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .faq-header .icon {
+                font-size: 2.5rem;
+            }
+            
+            .faq-header p {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
+            
+            .faq-question, .faq-answer {
+                padding: 1rem;
+            }
+            
+            .faq-question h3 {
+                font-size: 1.1rem;
+            }
+            
+            .faq-answer p {
+                font-size: 0.95rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .faq-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .faq-header .icon {
+                font-size: 2rem;
+            }
+            
+            .faq-header p {
+                font-size: 0.9rem;
+            }
+            
+            .faq-question h3 {
+                font-size: 1rem;
+            }
+            
+            .faq-answer p {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .faq-header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .faq-header .icon {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="faq-container">
+        <header class="faq-header">
+            <h1>
+                <span class="icon">❓</span>
+                Frequently Asked Questions
+            </h1>
+            <p>Find answers to common questions about this project</p>
+        </header>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                <h3>Is my grade sheet being stored?</h3>
+            </div>
+            <div class="faq-answer">
+                <p>No, it is not. The website takes the values from your grade sheet and caches them in your browser temporarily. If you reload the page, this data will be removed. We do not store any of your information on our servers.</p>
+            </div>
+        </div>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                <h3>What is the purpose of this website?</h3>
+            </div>
+            <div class="faq-answer">
+                <p>As a BRAC University student, I always had to maintain an Excel sheet to see how much my CGPA would increase if I retook a course, or to determine what GPA I needed to achieve my dream CGPA. This was quite a hassle, so I created this website to simplify the process.</p>
+            </div>
+        </div>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                <h3>Can I see the source code?</h3>
+            </div>
+            <div class="faq-answer">
+                <p>Absolutely! Here is the <a href="https://github.com/badhon495/should-i-retake" target="_blank" rel="noopener noreferrer">source code</a>. If you think of any features, just create an issue. Even better if you can implement it and make a pull request. Also, please give it a star if you can—it will help me out a lot!</p>
+            </div>
+        </div>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                <h3>Can I download what I created here?</h3>
+            </div>
+            <div class="faq-answer">
+                <p>Yes, you can download your data in Excel format and make changes to it as needed. You can also upload your modified Excel file to restore your data.</p>
+            </div>
+        </div>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                <h3>What is the simple version?</h3>
+            </div>
+            <div class="faq-answer">
+                <p>The simple version does the same thing as this website—calculating your future CGPA—but it's more straightforward and user-friendly. You don't need to upload your grade sheet; just provide your current CGPA and credit-related information, and you're good to go. It's perfect for quick calculations when you don't have your grade sheet.</p>
+            </div>
+        </div>
+        
+        <div class="back-link">
+            <a href="index.html">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>

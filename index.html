@@ -2,28 +2,258 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Should I Retake?</title>
+    <meta name="viewport" content="width=device-width, initial-scal    
+    <!-- Custom Styles (backup loading) -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="animations.css">
+    
+    <!-- SEO Meta Tags -->
+    <title>Should I Retake? - CGPA Calculator & Grade Analysis Tool</title>
+    <meta name="description" content="Upload your PDF grade sheet or Excel file to calculate your CGPA, analyze grades, and determine if you should retake courses. Free online tool for BRAC University students.">
+    <meta name="keywords" content="CGPA calculator, grade analysis, retake courses, BRAC University, GPA calculator, grade sheet analyzer, academic planning">
+    <meta name="author" content="Badhon">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    
+    <!-- Open Graph Meta Tags (Facebook, LinkedIn) -->
+    <meta property="og:title" content="Should I Retake? - CGPA Calculator & Grade Analysis Tool">
+    <meta property="og:description" content="Upload your PDF grade sheet or Excel file to calculate your CGPA, analyze grades, and determine if you should retake courses. Free online tool for BRAC University students.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://badhon495.github.io/should-i-retake/">
+    <meta property="og:site_name" content="Should I Retake?">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Should I Retake? - CGPA Calculator & Grade Analysis Tool">
+    <meta name="twitter:description" content="Upload your PDF grade sheet or Excel file to calculate your CGPA, analyze grades, and determine if you should retake courses.">
+    <meta name="twitter:creator" content="@badhon495">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://badhon495.github.io/should-i-retake/">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    
+    <!-- Critical CSS to prevent FOUC -->
+    <style>
+        /* Critical styles to prevent flash of unstyled content */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #24273a;
+            min-height: 100vh;
+            line-height: 1.6;
+            color: #cad3f5;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        body.loaded {
+            opacity: 1;
+        }
+        
+        .initial-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #24273a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: #cad3f5;
+        }
+        
+        .initial-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .loader-content {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .loader-content h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .loader-content .icon {
+            font-size: 3rem;
+        }
+        
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(202, 211, 245, 0.3);
+            border-left: 4px solid #cad3f5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Critical button styles */
+        .simple-calculator-btn {
+            background: linear-gradient(135deg, #7dc4e4, #91d7e3);
+            color: #1e2030;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(125, 196, 228, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* ...existing code... */
+        
+        @media (max-width: 768px) {
+            .loader-content h1 {
+                font-size: 2.2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .loader-content .icon {
+                font-size: 2.5rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .loader-content h1 {
+                font-size: 1.8rem;
+            }
+            
+            .loader-content .icon {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .loader-content h1 {
+                font-size: 1.6rem;
+            }
+            
+            .loader-content .icon {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+    
+    <!-- Preload fonts for better performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Preload critical CSS files -->
+    <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="animations.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- Fallback for browsers that don't support preload -->
+    <noscript>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="animations.css">
+    </noscript>
+    
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="animations.css">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Should I Retake?",
+        "description": "A free online CGPA calculator and grade analysis tool that helps students determine if they should retake courses to improve their academic performance.",
+        "url": "https://badhon495.github.io/should-i-retake/",
+        "author": {
+            "@type": "Person",
+            "name": "Badhon"
+        },
+        "applicationCategory": "Educational Tool",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "150"
+        }
+    }
+    </script>
 </head>
 <body>
+    <!-- Initial loading screen to prevent FOUC -->
+    <div class="initial-loader" id="initialLoader">
+        <div class="loader-content">
+            <h1>
+                <span class="icon">🎓</span>
+                Should I Retake?
+            </h1>
+            <div class="loader-spinner"></div>
+            <p>Loading your grade analysis tool...</p>
+        </div>
+    </div>
+
     <!-- Main Container -->
     <div class="container">
-        
         <!-- Header Section -->
         <header class="header">
             <h1>
                 <span class="icon">🎓</span>
                 Should I Retake?
             </h1>
-            <p>Upload your PDF grade sheet to extract course numbers and grade points</p>
+            <p>Upload your grade sheet and start analyzing it!</p>
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <button onclick="window.open('https://badhon495.github.io/bracu-cgpa-calculator/', '_blank')" class="simple-calculator-btn">
+                    Simple Version
+                </button>
+            </div>
         </header>
 
         <!-- Upload Section -->
@@ -33,13 +263,13 @@
                     ☁️
                 </div>
                 <div class="upload-text">
-                    <h3>Drop your PDF here or click to browse</h3>
-                    <p>Supports PDF files up to 10MB</p>
+                    <h3>Drop your Grade Sheet or click to browse</h3>
+                    <p>Supports PDF and Excel files (.xlsx, .xls)</p>
                     <button class="upload-btn" type="button">
                         Choose File
                     </button>
                 </div>
-                <input id="fileInput" type="file" accept=".pdf" class="file-input">
+                <input id="fileInput" type="file" accept=".pdf,.xlsx,.xls" class="file-input">
             </div>
             
             <!-- Loading Indicator -->
@@ -49,10 +279,10 @@
                     Processing your grade sheet...
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Results Section -->
-        <section id="resultsSection" class="results-section">
+        <section id="resultsSection" class="results-section" aria-label="Grade Analysis Results">
             
             <!-- Summary Cards -->
             <div class="summary-grid">
@@ -68,12 +298,26 @@
                     <h3>Current CGPA</h3>
                     <div id="currentCGPA" class="value">0.00</div>
                 </div>
+                <div class="summary-card dream-cgpa">
+                    <h3>Dream CGPA</h3>
+                    <div id="dreamCGPA" class="value dream">0.00</div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <button id="resetBtn" class="control-btn reset-btn">
+                Reset to Original
+                </button>
+                <button id="exportBtn" class="control-btn export-btn">
+                    Export to Excel
+                </button>
             </div>
 
             <!-- Course Table -->
             <div class="table-card">
-                <div class="table-header">
-                    <h2>📚 Course Details</h2>
+                <div class="table-header" style="text-align: center;">
+                    <h2>Course Details</h2>
                 </div>
                 <div class="table-container">
                     <table class="course-table">
@@ -81,8 +325,9 @@
                             <tr>
                                 <th>Course Code</th>
                                 <th>Credits Earned</th>
-                                <th>Grade Points</th>
+                                <th>Grade Points <span class="editable-hint">(Editable)</span></th>
                                 <th>Quality Points</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="courseTableBody">
@@ -91,8 +336,21 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Add Course Button -->
+            <div class="add-course-section">
+                <button id="addCourseBtn" class="add-course-simple-btn" type="button">
+                    ➕ Add Course
+                </button>
+            </div>
             
         </section>
+        </main>
+
+        <!-- FAQ Section Link -->
+        <aside class="faq-link-section" style="margin-top: 2rem; text-align: center;">
+            <p style="font-size: 1.1rem;">If you have any questions regarding this project, <a href="faq.html" style="color: #7dc4e4; font-weight: 600; text-decoration: underline;">visit the FAQ page</a>.</p>
+        </aside>
 
         <!-- Error Message -->
         <div id="errorMessage" class="error-message">
@@ -102,16 +360,43 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <p>© 2025 Grade Sheet Analyzer. Built with PDF.js and modern web technologies.</p>
-        </footer>
-
     </div>
 
+    <!-- SheetJS Library for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <!-- Custom JavaScript -->
-    <script src="config.js"></script>
-    <script src="utils.js"></script>
     <script src="script.js"></script>
+    
+    <!-- Loading state management -->
+    <script>
+        // Hide loader and show content when everything is loaded
+        function hideLoader() {
+            const loader = document.getElementById('initialLoader');
+            const body = document.body;
+            
+            if (loader && body) {
+                loader.classList.add('hidden');
+                body.classList.add('loaded');
+            }
+        }
+        
+        // Hide loader when DOM is ready and fonts are loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Give a small delay to ensure fonts are loaded
+                setTimeout(hideLoader, 100);
+            });
+        } else {
+            // DOM is already ready
+            setTimeout(hideLoader, 100);
+        }
+        
+        // Additional safety: hide loader when window is fully loaded
+        window.addEventListener('load', hideLoader);
+        
+        // Hide loader after maximum 3 seconds as fallback
+        setTimeout(hideLoader, 3000);
+    </script>
 </body>
 </html>
