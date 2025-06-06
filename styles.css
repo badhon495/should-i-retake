@@ -49,8 +49,35 @@ body {
 
 .header p {
     font-size: 1.25rem;
+    line-height: 1.5;
     opacity: 0.9;
     font-weight: 300;
+    justify-content: center;
+}
+
+/* Simple Calculator Button */
+.simple-calculator-btn {
+    background: linear-gradient(135deg, #7dc4e4, #91d7e3);
+    color: #1e2030;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(125, 196, 228, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.simple-calculator-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(125, 196, 228, 0.4);
+}
+
+.simple-calculator-btn:active {
+    transform: translateY(0);
 }
 
 /* Main upload card */
@@ -795,8 +822,8 @@ body {
     }
     
     .header p {
-        font-size: 1rem;
-        padding: 0 1rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
     }
     
     .upload-card {
@@ -905,6 +932,11 @@ body {
     .error-content {
         padding: 1rem;
         font-size: 0.9rem;
+    }
+    
+    .simple-calculator-btn {
+        padding: 0.7rem 1rem;
+        font-size: 0.85rem;
     }
 }
 
