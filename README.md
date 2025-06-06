@@ -1,6 +1,14 @@
 <div align="center">
 
 # Should I Retake?
+<div align="center">
+<h2 style="color: red; font-size: 24px;">
+🚨 THIS IS THE DEPLOYED VERSION OF MY PORTFOLIO WEBSITE 🚨
+</h2>
+<h3 style="color: red;">
+DO NOT COPY IT AS IT CONTAINS GOOGLE ANALYTICS AND OTHER PERSONAL CONFIGURATIONS THAT ARE NOT MEANT TO BE COPIED!
+</h3>
+</div>
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
