@@ -205,12 +205,6 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Test button */
-.test-section {
-    text-align: center;
-    margin-top: 2rem;
-}
-
 /* Results section */
 .results-section {
     display: none;
