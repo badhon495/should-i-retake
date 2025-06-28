@@ -46,6 +46,7 @@ This formula calculates your grade point up to four decimal places. If you get a
 ```javascript
 CGPA = Total Quality Points / Total Credits
 ```
+Here `Total Quality Points` is the sum of (Credits × Grade Points) for all courses, and `Total Credits` is the sum of all course credits.
 
 
 ## Contributing
