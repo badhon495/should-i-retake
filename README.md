@@ -24,18 +24,28 @@ This is a modern, client-side web application built to help BRAC University stud
   - **Quality Points**: Automatically calculates (Credits × Grade Points)
 
 
-## Quick Start
+## Getting Started
 
-1. Clone or download this repository
-2. Open `index.html` in your web browser
-3. Upload your PDF grade sheet and analyze!
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/badhon495/should-i-retake.git
+   ```
+
+2. **Navigate to the project directory**:
+   ```bash
+   cd should-i-retake
+   ```
+
+3. **Open in browser**:
+   - Simply open `index.html` in your web browser and start using the application.
 
 
-### CGPA Calculation
+## CGPA Calculation
+This formula calculates your grade point up to four decimal places. If you get a CGPA of 3.567 then it will be rounded to 3.57 in Connect.
+
 ```javascript
 CGPA = Total Quality Points / Total Credits
 ```
-This formula calculates your grade point up to four decimal places. If you get a CGPA of 3.567 then it will be rounded to 3.57 in Connect.
 
 
 ## Contributing
