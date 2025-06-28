@@ -7,7 +7,7 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![PDF.js](https://img.shields.io/badge/PDF.js-00539F?style=flat-square&logo=pdf&logoColor=white)
 
-This is a modern, client-side web application built to help BRAC University students take control of their academic journey. Simply download your grade sheet from Connect, upload it here, and instantly see how many courses you need to retake or what grades you’ll need in future courses to reach your target CGPA. Designed to be simple yet powerful, this tool brings clarity to academic planning. Built with JavaScript, pdf.js, HTML, and CSS, it runs entirely in the browser—no data ever leaves your device.
+This is a modern, client-side web application built to help BRAC University students take control of their academic journey. Simply download your grade sheet from Connect, upload it here, and instantly see how many courses you need to retake or what grades you’ll need in future courses to reach your target CGPA. Designed to be simple yet powerful, this tool brings clarity to academic planning. Built with JavaScript, pdf.js, HTML, and CSS, it runs entirely in the browser. NO DATA EVER LEAVES YOUR DEVICE.
 </div>
 
 
