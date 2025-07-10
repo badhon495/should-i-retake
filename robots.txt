@@ -1,0 +1,37 @@
+User-agent: *
+Allow: /
+
+# Allow all important pages
+Allow: /index.html
+Allow: /faq.html
+Allow: /styles.css
+Allow: /animations.css
+Allow: /script.js
+Allow: /manifest.json
+Allow: /humans.txt
+Allow: /404.html
+Allow: /sw.js
+Allow: /browserconfig.xml
+
+# Disallow unnecessary files
+Disallow: /README.md
+Disallow: /README-new.md
+Disallow: /LICENSE
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /Queries.csv
+Disallow: /*.pdf$
+Disallow: /*.xls$
+Disallow: /*.xlsx$
+
+# Sitemap location
+Sitemap: https://badhon495.github.io/should-i-retake/sitemap.xml
+
+# Crawl delay (optional - be respectful to search engines)
+Crawl-delay: 1
+
+# Cache control for static files
+User-agent: *
+Disallow: /node_modules/
+Disallow: /temp/
+Disallow: /cache/
