@@ -11,20 +11,48 @@
     AddOutputFilterByType DEFLATE application/x-javascript
 </IfModule>
 
-# Enable browser caching
+# Enable browser caching with cache-busting
 <IfModule mod_expires.c>
     ExpiresActive On
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType text/javascript "access plus 1 month"
+    
+    # HTML files - no cache for dynamic updates
+    ExpiresByType text/html "access plus 0 seconds"
+    
+    # CSS and JS - short cache with must-revalidate
+    ExpiresByType text/css "access plus 1 hour"
+    ExpiresByType application/javascript "access plus 1 hour"
+    ExpiresByType text/javascript "access plus 1 hour"
+    
+    # Images and other assets
     ExpiresByType image/png "access plus 1 month"
     ExpiresByType image/jpg "access plus 1 month"
     ExpiresByType image/jpeg "access plus 1 month"
     ExpiresByType image/gif "access plus 1 month"
     ExpiresByType image/ico "access plus 1 month"
     ExpiresByType image/icon "access plus 1 month"
-    ExpiresByType text/html "access plus 1 hour"
     ExpiresByType application/json "access plus 1 hour"
+</IfModule>
+
+# Cache Control Headers for better cache management
+<IfModule mod_headers.c>
+    # HTML files - force revalidation
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+    
+    # CSS and JS files - allow caching but with validation
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=3600, must-revalidate"
+    </FilesMatch>
+    
+    # Service Worker - never cache
+    <FilesMatch "sw\.js$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
 </IfModule>
 
 # Remove trailing slashes

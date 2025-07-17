@@ -1,7 +1,7 @@
 // Service Worker for Should I Retake? - BRACU CGPA Calculator
 // Provides offline functionality and caching
 
-const CACHE_NAME = 'bracu-cgpa-calculator-v1.0';
+const CACHE_NAME = 'bracu-cgpa-calculator-v1.1';
 const urlsToCache = [
   '/should-i-retake/',
   '/should-i-retake/index.html',
@@ -15,65 +15,99 @@ const urlsToCache = [
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
 ];
 
-// Install service worker
+// Install service worker and skip waiting
 self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
-  );
-});
-
-// Fetch event
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        
-        // Clone the request
-        const fetchRequest = event.request.clone();
-        
-        return fetch(fetchRequest).then((response) => {
-          // Check if we received a valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          
-          // Clone the response
-          const responseToCache = response.clone();
-          
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          
-          return response;
-        });
+      .then(() => {
+        // Force the waiting service worker to become the active service worker
+        return self.skipWaiting();
       })
   );
 });
 
-// Update service worker
+// Activate service worker and clean old caches
 self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME];
-  
+  console.log('Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
+    }).then(() => {
+      // Take control of all pages immediately
+      return self.clients.claim();
     })
   );
+});
+
+// Fetch event with network-first strategy for HTML/JS/CSS
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // Network-first strategy for our own files to get latest updates
+  if (url.origin === location.origin && 
+      (url.pathname.endsWith('.html') || 
+       url.pathname.endsWith('.js') || 
+       url.pathname.endsWith('.css') ||
+       url.pathname === '/should-i-retake/' ||
+       url.pathname === '/should-i-retake/index.html')) {
+    
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // If we get a valid response, cache it and return
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            return response;
+          }
+          // If network fails, try cache
+          return caches.match(event.request);
+        })
+        .catch(() => {
+          // Network failed, try cache
+          return caches.match(event.request);
+        })
+    );
+  } else {
+    // Cache-first strategy for external resources
+    event.respondWith(
+      caches.match(event.request)
+        .then((response) => {
+          if (response) {
+            return response;
+          }
+          
+          return fetch(event.request).then((response) => {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            
+            return response;
+          });
+        })
+    );
+  }
 });
 
 // Handle background sync
