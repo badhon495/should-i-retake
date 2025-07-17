@@ -3,14 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scal    
-    <!-- Cache Control Meta Tags -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
     <!-- Custom Styles (backup loading) -->
-    <link rel="stylesheet" href="styles.css?v=1.1">
-    <link rel="stylesheet" href="animations.css?v=1.1">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="animations.css">
     
     <!-- SEO Meta Tags -->
     <title>Should I Retake? | BRAC University GPA Calculator</title>
@@ -250,18 +245,18 @@ href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Preload critical CSS files -->
-    <link rel="preload" href="styles.css?v=1.1" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="animations.css?v=1.1" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="animations.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     
     <!-- Fallback for browsers that don't support preload -->
     <noscript>
-        <link rel="stylesheet" href="styles.css?v=1.1">
-        <link rel="stylesheet" href="animations.css?v=1.1">
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="animations.css">
     </noscript>
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="styles.css?v=1.1">
-    <link rel="stylesheet" href="animations.css?v=1.1">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="animations.css">
 </head>
 <body>
 </head>
@@ -426,62 +421,21 @@ href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <!-- Custom JavaScript -->
-    <script src="script.js?v=1.1"></script>
+    <script src="script.js"></script>
     
     <!-- Loading state management -->
     <script>
-        // Service Worker registration with update handling
+        // Service Worker registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/should-i-retake/sw.js')
                     .then((registration) => {
                         console.log('SW registered: ', registration);
-                        
-                        // Check for updates
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // New content is available, prompt user to refresh
-                                    if (confirm('New version available! Click OK to refresh and get the latest features.')) {
-                                        window.location.reload();
-                                    }
-                                }
-                            });
-                        });
                     })
                     .catch((registrationError) => {
                         console.log('SW registration failed: ', registrationError);
                     });
-                    
-                // Listen for messages from service worker
-                navigator.serviceWorker.addEventListener('message', (event) => {
-                    if (event.data && event.data.type === 'CACHE_UPDATED') {
-                        // Cache has been updated, optionally notify user
-                        console.log('Cache updated with latest content');
-                    }
-                });
             });
-        }
-        
-        // Force cache refresh function
-        function forceCacheRefresh() {
-            if ('caches' in window) {
-                caches.keys().then(function(names) {
-                    for (let name of names) {
-                        caches.delete(name);
-                    }
-                    window.location.reload(true);
-                });
-            } else {
-                window.location.reload(true);
-            }
-        }
-        
-        // Check if this is a forced refresh (Ctrl+F5)
-        if (performance.navigation.type === performance.navigation.TYPE_RELOAD) {
-            console.log('Page was refreshed - clearing cache');
-            forceCacheRefresh();
         }
         
         // Hide loader and show content when everything is loaded
