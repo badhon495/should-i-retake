@@ -242,7 +242,7 @@ class GradeSheetAnalyzer {
         
         console.log(`📋 Processing ${lines.length} lines and ${words.length} words`);
         
-        const courseMap = new Map(); // To handle duplicates with RP priority
+        const courseMap = new Map(); // To handle duplicates with RP/RT priority
         
         // Method 1: Line-by-line parsing
         for (let i = 0; i < lines.length; i++) {
@@ -262,14 +262,37 @@ class GradeSheetAnalyzer {
                 const courseCode = courseMatch[1];
                 console.log(`🎯 Found course code: ${courseCode}`);
                 
-                // Check if this line contains "(RP)" notation in various formats
-                const isRetake = line.includes('(RP)') || 
-                                line.includes('( RP )') || 
-                                line.includes(' RP ') || 
-                                line.includes(' RP') ||
-                                /\bRP\b/.test(line); // Word boundary for standalone RP
+                // Check if this line contains "(RP)" or "(RT)" notation in various formats
+                const hasRP = line.includes('(RP)') || 
+                              line.includes('( RP )') || 
+                              line.includes(' RP ') || 
+                              line.includes(' RP') ||
+                              line.includes('RP ') ||
+                              line.includes(' RP') ||
+                              /\bRP\b/i.test(line) || // Word boundary for standalone RP (case insensitive)
+                              /(^|\s)RP(\s|$)/i.test(line); // RP as standalone word
+                
+                const hasRT = line.includes('(RT)') || 
+                              line.includes('( RT )') || 
+                              line.includes(' RT ') || 
+                              line.includes(' RT') ||
+                              line.includes('RT ') ||
+                              line.includes(' RT') ||
+                              /\bRT\b/i.test(line) || // Word boundary for standalone RT (case insensitive)
+                              /(^|\s)RT(\s|$)/i.test(line); // RT as standalone word
+                
+                const isRetake = hasRP || hasRT;
                 if (isRetake) {
-                    console.log(`🔄 Found retake course with (RP): ${courseCode}`);
+                    const notation = hasRP && hasRT ? 'RP/RT' : (hasRP ? 'RP' : 'RT');
+                    console.log(`🔄 Found retake course with (${notation}): ${courseCode}`);
+                    console.log(`🔍 Line content for retake detection: "${line}"`);
+                }
+                
+                // Additional debugging for RT specifically
+                if (hasRT && !hasRP) {
+                    console.log(`🔥 RT FOUND: Course ${courseCode} detected as RT retake`);
+                } else if (hasRP && !hasRT) {
+                    console.log(`🔄 RP FOUND: Course ${courseCode} detected as RP repeat`);
                 }
                 
                 // Extract all decimal numbers from the line
@@ -278,10 +301,21 @@ class GradeSheetAnalyzer {
                 
                 if (numbers && numbers.length >= 2) {
                     // The first number should be credits, the last should be grade points
-                    const credits = parseFloat(numbers[0]);
+                    let credits = parseFloat(numbers[0]);
                     const gradePoints = parseFloat(numbers[numbers.length - 1]);
                     
                     console.log(`📊 Attempting to parse - Course: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}, Retake: ${isRetake}`);
+                    
+                    // Handle failed courses: if both credits and grade points are 0, 
+                    // use standard credit hours for CGPA calculation (excluding prep courses)
+                    const isFailedCourse = credits === 0 && gradePoints === 0;
+                    const isPrepCourse = ['MAT091', 'MAT092', 'ENG091'].includes(courseCode);
+                    
+                    if (isFailedCourse && !isPrepCourse) {
+                        // Assign standard credit hours for failed courses
+                        credits = this.getStandardCredits(courseCode);
+                        console.log(`📉 Failed course detected: ${courseCode}, using standard credits: ${credits}`);
+                    }
                     
                     // Validate that we have reasonable values
                     if (credits >= 0 && credits <= 10 && gradePoints >= 0 && gradePoints <= 4.0) {
@@ -290,7 +324,9 @@ class GradeSheetAnalyzer {
                             credits: credits,
                             gradePoints: gradePoints,
                             qualityPoints: credits * gradePoints,
-                            isRetake: isRetake
+                            isRetake: isRetake,
+                            retakeType: isRetake ? (hasRP && hasRT ? 'RP/RT' : (hasRP ? 'RP' : 'RT')) : null,
+                            isFailed: isFailedCourse && !isPrepCourse
                         };
                         
                         // Handle duplicates by prioritizing retake courses
@@ -308,7 +344,7 @@ class GradeSheetAnalyzer {
             this.parseWordByWord(words, courseMap);
         }
         
-        // Convert the course map to arrays, with retake courses taking priority
+        // Convert the course map to arrays, with retake courses (RP/RT) taking priority
         this.courses = Array.from(courseMap.values());
         this.originalCourses = this.courses.map(course => ({...course})); // Store original values
         
@@ -317,7 +353,7 @@ class GradeSheetAnalyzer {
     }
 
     /**
-     * Handle duplicate courses by prioritizing retake courses with (RP) notation
+     * Handle duplicate courses by prioritizing retake courses with (RP) or (RT) notation
      * For multiple retakes, prioritize the one with the highest grade points
      */
     handleDuplicateCourse(courseMap, newCourseData) {
@@ -356,6 +392,31 @@ class GradeSheetAnalyzer {
     }
     
     /**
+     * Get standard credit hours for a course based on course code patterns
+     */
+    getStandardCredits(courseCode) {
+        // Common BRAC University credit patterns
+        if (courseCode.match(/^(CSE|EEE|ECE)\d{3}$/)) {
+            return 3; // Most CSE/EEE/ECE courses are 3 credits
+        } else if (courseCode.match(/^(CSE|EEE|ECE)\d{3}L$/)) {
+            return 1; // Lab courses are typically 1 credit
+        } else if (courseCode.match(/^MAT\d{3}$/)) {
+            return 3; // Math courses are typically 3 credits
+        } else if (courseCode.match(/^(PHY|CHE)\d{3}$/)) {
+            return 3; // Physics/Chemistry courses are typically 3 credits
+        } else if (courseCode.match(/^(PHY|CHE)\d{3}L$/)) {
+            return 1; // Lab courses are typically 1 credit
+        } else if (courseCode.match(/^ENG\d{3}$/)) {
+            return 3; // English courses are typically 3 credits
+        } else if (courseCode.match(/^BUS\d{3}$/)) {
+            return 3; // Business courses are typically 3 credits
+        } else {
+            // Default to 3 credits for unknown course patterns
+            return 3;
+        }
+    }
+
+    /**
      * Check if a line should be skipped during parsing
      */
     shouldSkipLine(line) {
@@ -389,18 +450,42 @@ class GradeSheetAnalyzer {
             if (/^[A-Z]{2,4}\d{3}$/.test(word)) {
                 console.log(`🎯 Found course code (word method): ${word}`);
                 
-                // Check for (RP) notation in surrounding words with enhanced detection
+                // Check for (RP) or (RT) notation in surrounding words with enhanced detection
                 const contextWords = words.slice(Math.max(0, i - 3), i + 10);
-                const isRetake = contextWords.some(w => 
+                const hasRP = contextWords.some(w => 
                     w.includes('(RP)') || 
                     w.includes('( RP )') || 
                     w.includes(' RP ') || 
                     w.includes(' RP') ||
+                    w.includes('RP ') ||
                     w === 'RP' ||
-                    /\bRP\b/.test(w)
+                    /\bRP\b/i.test(w) || // Case insensitive
+                    /(^|\s)RP(\s|$)/i.test(w)
                 );
+                
+                const hasRT = contextWords.some(w => 
+                    w.includes('(RT)') || 
+                    w.includes('( RT )') || 
+                    w.includes(' RT ') || 
+                    w.includes(' RT') ||
+                    w.includes('RT ') ||
+                    w === 'RT' ||
+                    /\bRT\b/i.test(w) || // Case insensitive
+                    /(^|\s)RT(\s|$)/i.test(w)
+                );
+                
+                const isRetake = hasRP || hasRT;
                 if (isRetake) {
-                    console.log(`🔄 Found retake course with (RP) in word method: ${word}`);
+                    const notation = hasRP && hasRT ? 'RP/RT' : (hasRP ? 'RP' : 'RT');
+                    console.log(`🔄 Found retake course with (${notation}) in word method: ${word}`);
+                    console.log(`🔍 Context words for retake detection: [${contextWords.join(', ')}]`);
+                }
+                
+                // Additional debugging for RT specifically
+                if (hasRT && !hasRP) {
+                    console.log(`🔥 RT FOUND (word method): Course ${word} detected as RT retake`);
+                } else if (hasRP && !hasRT) {
+                    console.log(`🔄 RP FOUND (word method): Course ${word} detected as RP repeat`);
                 }
                 
                 // Look for two decimal numbers in the next few words
@@ -418,8 +503,19 @@ class GradeSheetAnalyzer {
                 if (numbers.length >= 2) {
                     // Find the best pair (credits should be first occurrence, grade points should be reasonable)
                     for (let j = 0; j < numbers.length - 1; j++) {
-                        const credits = numbers[j];
+                        let credits = numbers[j];
                         const gradePoints = numbers[j + 1];
+                        
+                        // Handle failed courses: if both credits and grade points are 0, 
+                        // use standard credit hours for CGPA calculation (excluding prep courses)
+                        const isFailedCourse = credits === 0 && gradePoints === 0;
+                        const isPrepCourse = ['MAT091', 'MAT092', 'ENG091'].includes(word);
+                        
+                        if (isFailedCourse && !isPrepCourse) {
+                            // Assign standard credit hours for failed courses
+                            credits = this.getStandardCredits(word);
+                            console.log(`📉 Failed course detected (word method): ${word}, using standard credits: ${credits}`);
+                        }
                         
                         if (credits >= 0 && credits <= 10 && gradePoints >= 0 && gradePoints <= 4.0) {
                             const courseData = {
@@ -427,7 +523,9 @@ class GradeSheetAnalyzer {
                                 credits: credits,
                                 gradePoints: gradePoints,
                                 qualityPoints: credits * gradePoints,
-                                isRetake: isRetake
+                                isRetake: isRetake,
+                                retakeType: isRetake ? (hasRP && hasRT ? 'RP/RT' : (hasRP ? 'RP' : 'RT')) : null,
+                                isFailed: isFailedCourse && !isPrepCourse
                             };
                             
                             // Handle duplicates by prioritizing retake courses
@@ -534,15 +632,52 @@ class GradeSheetAnalyzer {
             const creditsValue = row[creditsCol];
             const gradePointsValue = row[gradePointsCol];
             
-            // Check if any cell in this row contains (RP) notation with enhanced detection
+            // Check if any cell in this row contains (RP) or (RT) notation with enhanced detection
             const isRetake = row.some(cell => {
                 const cellStr = String(cell || '').toLowerCase();
                 return cellStr.includes('(rp)') || 
                        cellStr.includes('( rp )') || 
                        cellStr.includes(' rp ') || 
                        cellStr.includes(' rp') ||
-                       /\brp\b/.test(cellStr); // Word boundary for standalone rp
+                       cellStr.includes('rp ') ||
+                       /\brp\b/i.test(cellStr) || // Word boundary for standalone rp (case insensitive)
+                       /(^|\s)rp(\s|$)/i.test(cellStr) || // RP as standalone word
+                       cellStr.includes('(rt)') || 
+                       cellStr.includes('( rt )') || 
+                       cellStr.includes(' rt ') || 
+                       cellStr.includes(' rt') ||
+                       cellStr.includes('rt ') ||
+                       /\brt\b/i.test(cellStr) || // Word boundary for standalone rt (case insensitive)
+                       /(^|\s)rt(\s|$)/i.test(cellStr); // RT as standalone word
             });
+            
+            // Determine retake type more specifically
+            let retakeType = null;
+            if (isRetake) {
+                const hasRP = row.some(cell => {
+                    const cellStr = String(cell || '').toLowerCase();
+                    return cellStr.includes('(rp)') || 
+                           cellStr.includes('( rp )') || 
+                           cellStr.includes(' rp ') || 
+                           cellStr.includes(' rp') ||
+                           cellStr.includes('rp ') ||
+                           /\brp\b/i.test(cellStr) ||
+                           /(^|\s)rp(\s|$)/i.test(cellStr);
+                });
+                
+                const hasRT = row.some(cell => {
+                    const cellStr = String(cell || '').toLowerCase();
+                    return cellStr.includes('(rt)') || 
+                           cellStr.includes('( rt )') || 
+                           cellStr.includes(' rt ') || 
+                           cellStr.includes(' rt') ||
+                           cellStr.includes('rt ') ||
+                           /\brt\b/i.test(cellStr) ||
+                           /(^|\s)rt(\s|$)/i.test(cellStr);
+                });
+                
+                retakeType = hasRP && hasRT ? 'RP/RT' : (hasRP ? 'RP' : 'RT');
+            }
             
             // Skip if course code doesn't look valid
             if (!courseCode || courseCode.toLowerCase().includes('summary') || courseCode.toLowerCase().includes('total')) {
@@ -550,8 +685,19 @@ class GradeSheetAnalyzer {
             }
             
             // Parse numeric values
-            const credits = parseFloat(creditsValue);
+            let credits = parseFloat(creditsValue);
             const gradePoints = parseFloat(gradePointsValue);
+            
+            // Handle failed courses: if both credits and grade points are 0, 
+            // use standard credit hours for CGPA calculation (excluding prep courses)
+            const isFailedCourse = credits === 0 && gradePoints === 0;
+            const isPrepCourse = ['MAT091', 'MAT092', 'ENG091'].includes(courseCode.toUpperCase());
+            
+            if (isFailedCourse && !isPrepCourse) {
+                // Assign standard credit hours for failed courses
+                credits = this.getStandardCredits(courseCode.toUpperCase());
+                console.log(`📉 Failed course detected (Excel): ${courseCode}, using standard credits: ${credits}`);
+            }
             
             // Validate values
             if (isNaN(credits) || isNaN(gradePoints) || 
@@ -567,14 +713,16 @@ class GradeSheetAnalyzer {
                 gradePoints: gradePoints,
                 qualityPoints: credits * gradePoints,
                 isManuallyAdded: false,
-                isRetake: isRetake
+                isRetake: isRetake,
+                retakeType: retakeType,
+                isFailed: isFailedCourse && !isPrepCourse
             };
             
             // Handle duplicates by prioritizing retake courses
             this.handleDuplicateCourse(courseMap, courseData);
         }
         
-        // Convert the course map to arrays, with retake courses taking priority
+        // Convert the course map to arrays, with retake courses (RP/RT) taking priority
         this.courses = Array.from(courseMap.values());
         this.originalCourses = this.courses.map(course => ({...course}));
         
@@ -606,16 +754,64 @@ class GradeSheetAnalyzer {
     }
 
     /**
+     * Calculate total earned credits (excluding failed courses)
+     */
+    calculateEarnedCredits() {
+        if (this.courses.length === 0) return 0;
+        
+        return this.courses.reduce((sum, course) => {
+            // If it's a failed course (isFailed = true), don't count it as earned
+            // Failed courses are those with 0 grade points originally
+            if (course.isFailed || course.gradePoints === 0) {
+                return sum;
+            }
+            return sum + course.credits;
+        }, 0);
+    }
+
+    /**
+     * Calculate total credit courses (courses that have credits > 0)
+     */
+    calculateCreditCourses() {
+        if (this.courses.length === 0) return 0;
+        
+        return this.courses.filter(course => course.credits > 0).length;
+    }
+
+    /**
+     * Calculate CGPA rounded according to BRAC University grading system
+     * (The CGPA gets rounded up if the third decimal digit is 5 or more)
+     */
+    calculateActualCGPA(cgpa) {
+        // Round to 2 decimal places according to BRACU system
+        // If third decimal is 5 or more, round up
+        const multiplied = cgpa * 100;
+        const thirdDecimal = Math.floor((cgpa * 1000) % 10);
+        
+        if (thirdDecimal >= 5) {
+            return Math.ceil(multiplied) / 100;
+        } else {
+            return Math.floor(multiplied) / 100;
+        }
+    }
+
+    /**
      * Update summary cards with current values
      */
     updateSummaryCards() {
         document.getElementById('totalCourses').textContent = this.courses.length;
+        document.getElementById('creditCourses').textContent = this.calculateCreditCourses();
         document.getElementById('totalCredits').textContent = this.courses.reduce((sum, course) => sum + course.credits, 0).toFixed(2);
+        document.getElementById('earnedCredits').textContent = this.calculateEarnedCredits().toFixed(2);
         
         // If no courses have been deleted and no grade changes, show original CGPA
         // Otherwise, show the current calculated CGPA for both
         const currentCGPA = this.calculateCGPA();
         const originalCGPA = this.calculateOriginalCGPA();
+        
+        // Calculate actual CGPAs according to BRACU rounding system
+        const currentActualCGPA = this.calculateActualCGPA(originalCGPA);
+        const dreamActualCGPA = this.calculateActualCGPA(currentCGPA);
         
         // Check if any courses have been deleted or grades modified
         const coursesDeleted = this.courses.length < this.originalCourses.length;
@@ -627,8 +823,11 @@ class GradeSheetAnalyzer {
         
         // Current CGPA: always show original CGPA (unchanged)
         document.getElementById('currentCGPA').textContent = originalCGPA.toFixed(4);
+        document.getElementById('currentActualCGPA').textContent = currentActualCGPA.toFixed(2);
+        
         // Dream CGPA: always show current calculated value (reflects all changes)
         document.getElementById('dreamCGPA').textContent = currentCGPA.toFixed(4);
+        document.getElementById('dreamActualCGPA').textContent = dreamActualCGPA.toFixed(2);
     }
 
     /**
@@ -695,21 +894,29 @@ class GradeSheetAnalyzer {
                 'Credits Earned': course.credits,
                 'Grade Points': course.gradePoints.toFixed(2),
                 'Quality Points': course.qualityPoints.toFixed(2),
-                'Type': course.isManuallyAdded ? 'Manual' : (course.isRetake ? 'Retake (RP)' : 'From Grade Sheet')
+                'Type': course.isManuallyAdded ? 'Manual' : (course.isRetake ? `Retake (${course.retakeType || 'RP/RT'})` : 'From Grade Sheet')
             }));
 
             // Add summary information
             const currentCGPA = this.calculateOriginalCGPA();
             const dreamCGPA = this.calculateCGPA();
             const totalCredits = this.courses.reduce((sum, course) => sum + course.credits, 0);
+            const earnedCredits = this.calculateEarnedCredits();
+            const creditCourses = this.calculateCreditCourses();
+            const currentActualCGPA = this.calculateActualCGPA(currentCGPA);
+            const dreamActualCGPA = this.calculateActualCGPA(dreamCGPA);
 
             const summaryData = [
                 {},
                 { 'Course Code': 'SUMMARY', 'Credits Earned': '', 'Grade Points': '', 'Quality Points': '', 'Type': '' },
                 { 'Course Code': 'Total Courses', 'Credits Earned': this.courses.length, 'Grade Points': '', 'Quality Points': '', 'Type': '' },
+                { 'Course Code': 'Credit Courses', 'Credits Earned': creditCourses, 'Grade Points': '', 'Quality Points': '', 'Type': '' },
                 { 'Course Code': 'Total Credits', 'Credits Earned': totalCredits.toFixed(2), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
+                { 'Course Code': 'Earned Credits', 'Credits Earned': earnedCredits.toFixed(2), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
                 { 'Course Code': 'Current CGPA', 'Credits Earned': currentCGPA.toFixed(4), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
-                { 'Course Code': 'Dream CGPA', 'Credits Earned': dreamCGPA.toFixed(4), 'Grade Points': '', 'Quality Points': '', 'Type': '' }
+                { 'Course Code': 'Current Actual CGPA', 'Credits Earned': currentActualCGPA.toFixed(2), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
+                { 'Course Code': 'Dream CGPA', 'Credits Earned': dreamCGPA.toFixed(4), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
+                { 'Course Code': 'Dream Actual CGPA', 'Credits Earned': dreamActualCGPA.toFixed(2), 'Grade Points': '', 'Quality Points': '', 'Type': '' }
             ];
 
             // Combine course data with summary
@@ -766,7 +973,8 @@ class GradeSheetAnalyzer {
                 <td class="course-code">
                     ${course.courseCode}
                     ${course.isManuallyAdded ? '<span class="manual-course-tag">Manual</span>' : ''}
-                    ${course.isRetake ? '<span class="retake-course-tag">(RP)</span>' : ''}
+                    ${course.isRetake ? `<span class="retake-course-tag">(${this.getRetakeType(course, index)})</span>` : ''}
+                    ${course.isFailed ? '<span class="failed-course-tag">(F)</span>' : ''}
                 </td>
                 <td>${course.credits.toFixed(2)}</td>
                 <td>
@@ -796,6 +1004,19 @@ class GradeSheetAnalyzer {
             behavior: 'smooth',
             block: 'start'
         });
+    }
+
+    /**
+     * Get the specific retake type for a course (RT, RP, or RP/RT)
+     */
+    getRetakeType(course, index) {
+        // If the course has specific retake type stored, use it
+        if (course.retakeType) {
+            return course.retakeType;
+        }
+        
+        // Default to RP/RT if we can't determine the specific type
+        return 'RP/RT';
     }
 
     /**
