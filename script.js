@@ -111,7 +111,7 @@ class GradeSheetAnalyzer {
             this.hideError();
             this.hideResults();
 
-            console.log(`📄 Processing PDF: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+            console.log(`Processing PDF: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
 
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
@@ -120,7 +120,7 @@ class GradeSheetAnalyzer {
             
             // Extract text from all pages with better structure preservation
             for (let i = 1; i <= pdf.numPages; i++) {
-                console.log(`📖 Processing page ${i} of ${pdf.numPages}`);
+                console.log(`Processing page ${i} of ${pdf.numPages}`);
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
                 
@@ -156,14 +156,14 @@ class GradeSheetAnalyzer {
                 }
             }
 
-            console.log('📝 Extracted PDF text (structured):', fullText);
-            console.log(`📊 Text length: ${fullText.length} characters`);
-            
+            console.log('Extracted PDF text (structured):', fullText);
+            console.log(`Text length: ${fullText.length} characters`);
+
             // Parse the extracted text
             this.parseGradeSheet(fullText);
             
             if (this.courses.length === 0) {
-                console.error('❌ No courses found. PDF text was:', fullText);
+                console.error('No courses found. PDF text was:', fullText);
                 this.showError(`No courses found in the PDF. Please make sure this is a valid grade sheet. 
                 Extracted text length: ${fullText.length} characters. 
                 Check browser console for more details.`);
@@ -171,10 +171,10 @@ class GradeSheetAnalyzer {
             }
 
             this.displayResults();
-            this.showSuccessMessage(`✅ Successfully extracted ${this.courses.length} courses from your grade sheet!`);
+            this.showSuccessMessage(`Successfully extracted ${this.courses.length} courses from your grade sheet!`);
             
         } catch (error) {
-            console.error('❌ Error processing PDF:', error);
+            console.error('Error processing PDF:', error);
             this.showError('Error processing PDF. Please try again with a different file. Check browser console for details.');
         } finally {
             this.showLoading(false);
@@ -190,7 +190,7 @@ class GradeSheetAnalyzer {
             this.hideError();
             this.hideResults();
 
-            console.log(`📊 Processing Excel: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+            console.log(`Processing Excel: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
 
             const arrayBuffer = await file.arrayBuffer();
             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
@@ -201,23 +201,23 @@ class GradeSheetAnalyzer {
             
             // Convert to JSON
             const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            
-            console.log('📝 Extracted Excel data:', data);
-            
+
+            console.log('Extracted Excel data:', data);
+
             // Parse the Excel data
             this.parseExcelData(data);
             
             if (this.courses.length === 0) {
-                console.error('❌ No courses found in Excel file');
+                console.error('No courses found in Excel file');
                 this.showError(`No valid courses found in the Excel file. Please make sure the file contains columns for Course Code, Credits, and Grade Points.`);
                 return;
             }
 
             this.displayResults();
-            this.showSuccessMessage(`✅ Successfully imported ${this.courses.length} courses from your Excel file!`);
-            
+            this.showSuccessMessage(`Successfully imported ${this.courses.length} courses from your Excel file!`);
+
         } catch (error) {
-            console.error('❌ Error processing Excel:', error);
+            console.error('Error processing Excel:', error);
             this.showError('Error processing Excel file. Please check the file format and try again.');
         } finally {
             this.showLoading(false);
@@ -230,18 +230,18 @@ class GradeSheetAnalyzer {
     parseGradeSheet(text) {
         this.courses = [];
         this.originalCourses = []; // Reset original courses
-        
-        console.log('🔍 Starting grade sheet parsing...');
-        
+
+        console.log('Starting grade sheet parsing...');
+
         // Normalize the text - replace multiple spaces with single space
         const normalizedText = text.replace(/\s+/g, ' ').trim();
         
         // Split text into lines and words
         const lines = text.split('\n').map(line => line.trim()).filter(line => line);
         const words = normalizedText.split(' ');
-        
-        console.log(`📋 Processing ${lines.length} lines and ${words.length} words`);
-        
+
+        console.log(`Processing ${lines.length} lines and ${words.length} words`);
+
         const courseMap = new Map(); // To handle duplicates with RP/RT priority
         
         // Method 1: Line-by-line parsing
@@ -252,16 +252,16 @@ class GradeSheetAnalyzer {
             if (this.shouldSkipLine(line)) {
                 continue;
             }
-            
-            console.log(`🔎 Processing line: "${line}"`);
-            
+
+            console.log(`Processing line: "${line}"`);
+
             // Look for course pattern: CourseCode followed by course title, credits, grade, grade points
             const courseMatch = line.match(/^([A-Z]{2,4}\d{3})/);
             
             if (courseMatch) {
                 const courseCode = courseMatch[1];
-                console.log(`🎯 Found course code: ${courseCode}`);
-                
+                console.log(`Found course code: ${courseCode}`);
+
                 // Check if this line contains "(RP)" or "(RT)" notation in various formats
                 const hasRP = line.includes('(RP)') || 
                               line.includes('( RP )') || 
@@ -284,27 +284,27 @@ class GradeSheetAnalyzer {
                 const isRetake = hasRP || hasRT;
                 if (isRetake) {
                     const notation = hasRP && hasRT ? 'RP/RT' : (hasRP ? 'RP' : 'RT');
-                    console.log(`🔄 Found retake course with (${notation}): ${courseCode}`);
-                    console.log(`🔍 Line content for retake detection: "${line}"`);
+                    console.log(`Found retake course with (${notation}): ${courseCode}`);
+                    console.log(`Line content for retake detection: "${line}"`);
                 }
                 
                 // Additional debugging for RT specifically
                 if (hasRT && !hasRP) {
-                    console.log(`🔥 RT FOUND: Course ${courseCode} detected as RT retake`);
+                    console.log(`RT FOUND: Course ${courseCode} detected as RT retake`);
                 } else if (hasRP && !hasRT) {
-                    console.log(`🔄 RP FOUND: Course ${courseCode} detected as RP repeat`);
+                    console.log(`RP FOUND: Course ${courseCode} detected as RP repeat`);
                 }
                 
                 // Extract all decimal numbers from the line
                 const numbers = line.match(/\d+\.\d+/g);
-                console.log(`🔢 Numbers found in line: ${numbers ? numbers.join(', ') : 'none'}`);
+                console.log(`Numbers found in line: ${numbers ? numbers.join(', ') : 'none'}`);
                 
                 if (numbers && numbers.length >= 2) {
                     // The first number should be credits, the last should be grade points
                     let credits = parseFloat(numbers[0]);
                     const gradePoints = parseFloat(numbers[numbers.length - 1]);
                     
-                    console.log(`📊 Attempting to parse - Course: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}, Retake: ${isRetake}`);
+                    console.log(`Attempting to parse - Course: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}, Retake: ${isRetake}`);
                     
                     // Handle failed courses: if both credits and grade points are 0, 
                     // use standard credit hours for CGPA calculation (excluding prep courses)
@@ -314,7 +314,7 @@ class GradeSheetAnalyzer {
                     if (isFailedCourse && !isPrepCourse) {
                         // Assign standard credit hours for failed courses
                         credits = this.getStandardCredits(courseCode);
-                        console.log(`📉 Failed course detected: ${courseCode}, using standard credits: ${credits}`);
+                        console.log(`Failed course detected: ${courseCode}, using standard credits: ${credits}`);
                     }
                     
                     // Validate that we have reasonable values
@@ -332,7 +332,7 @@ class GradeSheetAnalyzer {
                         // Handle duplicates by prioritizing retake courses
                         this.handleDuplicateCourse(courseMap, courseData);
                     } else {
-                        console.log(`❌ Invalid values - Credits: ${credits}, Grade Points: ${gradePoints}`);
+                        console.log(`Invalid values - Credits: ${credits}, Grade Points: ${gradePoints}`);
                     }
                 }
             }
@@ -340,7 +340,7 @@ class GradeSheetAnalyzer {
         
         // Method 2: Word-by-word parsing if line parsing didn't work well
         if (courseMap.size === 0) {
-            console.log('🔄 Line parsing found no courses, trying word-by-word parsing...');
+            console.log('Line parsing found no courses, trying word-by-word parsing...');
             this.parseWordByWord(words, courseMap);
         }
         
@@ -348,8 +348,8 @@ class GradeSheetAnalyzer {
         this.courses = Array.from(courseMap.values());
         this.originalCourses = this.courses.map(course => ({...course})); // Store original values
         
-        console.log(`🎉 Parsing complete! Found ${this.courses.length} courses total`);
-        console.log('📋 Final parsed courses:', this.courses);
+        console.log(`Parsing complete! Found ${this.courses.length} courses total`);
+        console.log('Final parsed courses:', this.courses);
     }
 
     /**
@@ -364,30 +364,30 @@ class GradeSheetAnalyzer {
             
             // If the new course is a retake and the existing one is not, replace it
             if (newCourseData.isRetake && !existingCourse.isRetake) {
-                console.log(`🔄 Replacing original course ${courseCode} with retake version`);
+                console.log(`Replacing original course ${courseCode} with retake version`);
                 courseMap.set(courseCode, newCourseData);
             } 
             // If the existing course is a retake and the new one is not, keep the existing one
             else if (existingCourse.isRetake && !newCourseData.isRetake) {
-                console.log(`⚠️ Keeping existing retake course ${courseCode}, ignoring original`);
+                console.log(`Keeping existing retake course ${courseCode}, ignoring original`);
             }
             // If both are retakes, keep the one with higher grade points (latest/better grade)
             else if (existingCourse.isRetake && newCourseData.isRetake) {
                 if (newCourseData.gradePoints > existingCourse.gradePoints) {
-                    console.log(`🔄 Replacing existing retake ${courseCode} (${existingCourse.gradePoints}) with better retake (${newCourseData.gradePoints})`);
+                    console.log(`Replacing existing retake ${courseCode} (${existingCourse.gradePoints}) with better retake (${newCourseData.gradePoints})`);
                     courseMap.set(courseCode, newCourseData);
                 } else {
-                    console.log(`⚠️ Keeping existing retake ${courseCode} with better/equal grade (${existingCourse.gradePoints} >= ${newCourseData.gradePoints})`);
+                    console.log(`Keeping existing retake ${courseCode} with better/equal grade (${existingCourse.gradePoints} >= ${newCourseData.gradePoints})`);
                 }
             }
             // If both are originals, keep the first one found
             else {
-                console.log(`⚠️ Duplicate original course found for ${courseCode}, keeping first occurrence`);
+                console.log(`Duplicate original course found for ${courseCode}, keeping first occurrence`);
             }
         } else {
             // First occurrence of this course
             courseMap.set(courseCode, newCourseData);
-            console.log(`✅ Successfully parsed course: ${courseCode}, Credits: ${newCourseData.credits}, Grade Points: ${newCourseData.gradePoints}, Retake: ${newCourseData.isRetake || false}`);
+            console.log(`Successfully parsed course: ${courseCode}, Credits: ${newCourseData.credits}, Grade Points: ${newCourseData.gradePoints}, Retake: ${newCourseData.isRetake || false}`);
         }
     }
     
@@ -477,15 +477,15 @@ class GradeSheetAnalyzer {
                 const isRetake = hasRP || hasRT;
                 if (isRetake) {
                     const notation = hasRP && hasRT ? 'RP/RT' : (hasRP ? 'RP' : 'RT');
-                    console.log(`🔄 Found retake course with (${notation}) in word method: ${word}`);
-                    console.log(`🔍 Context words for retake detection: [${contextWords.join(', ')}]`);
+                    console.log(`Found retake course with (${notation}) in word method: ${word}`);
+                    console.log(`Context words for retake detection: [${contextWords.join(', ')}]`);
                 }
                 
                 // Additional debugging for RT specifically
                 if (hasRT && !hasRP) {
-                    console.log(`🔥 RT FOUND (word method): Course ${word} detected as RT retake`);
+                    console.log(`RT FOUND (word method): Course ${word} detected as RT retake`);
                 } else if (hasRP && !hasRT) {
-                    console.log(`🔄 RP FOUND (word method): Course ${word} detected as RP repeat`);
+                    console.log(`RP FOUND (word method): Course ${word} detected as RP repeat`);
                 }
                 
                 // Look for two decimal numbers in the next few words
@@ -498,7 +498,7 @@ class GradeSheetAnalyzer {
                     }
                 }
                 
-                console.log(`🔢 Numbers found after course code: ${numbers.join(', ')}`);
+                console.log(`Numbers found after course code: ${numbers.join(', ')}`);
                 
                 if (numbers.length >= 2) {
                     // Find the best pair (credits should be first occurrence, grade points should be reasonable)
@@ -514,7 +514,7 @@ class GradeSheetAnalyzer {
                         if (isFailedCourse && !isPrepCourse) {
                             // Assign standard credit hours for failed courses
                             credits = this.getStandardCredits(word);
-                            console.log(`📉 Failed course detected (word method): ${word}, using standard credits: ${credits}`);
+                            console.log(`Failed course detected (word method): ${word}, using standard credits: ${credits}`);
                         }
                         
                         if (credits >= 0 && credits <= 10 && gradePoints >= 0 && gradePoints <= 4.0) {
@@ -545,11 +545,11 @@ class GradeSheetAnalyzer {
         this.courses = [];
         this.originalCourses = [];
         
-        console.log('🔍 Starting Excel data parsing...');
-        console.log('📊 Excel data:', data);
+        console.log('Starting Excel data parsing...');
+        console.log('Excel data:', data);
         
         if (!data || data.length === 0) {
-            console.error('❌ No data found in Excel file');
+            console.error('No data found in Excel file');
             return;
         }
         
@@ -580,14 +580,14 @@ class GradeSheetAnalyzer {
             
             // If we found all three columns, we're good
             if (courseCodeCol !== -1 && creditsCol !== -1 && gradePointsCol !== -1) {
-                console.log(`📍 Found headers at row ${headerRowIndex}: Course Code(${courseCodeCol}), Credits(${creditsCol}), Grade Points(${gradePointsCol})`);
+                console.log(`Found headers at row ${headerRowIndex}: Course Code(${courseCodeCol}), Credits(${creditsCol}), Grade Points(${gradePointsCol})`);
                 break;
             }
         }
         
         // If we couldn't find proper headers, try to guess based on first few rows
         if (headerRowIndex === -1) {
-            console.log('⚠️ No proper headers found, trying to guess column structure...');
+            console.log('No proper headers found, trying to guess column structure...');
             // Assume first row is header or data, look for patterns
             headerRowIndex = 0;
             
@@ -605,7 +605,7 @@ class GradeSheetAnalyzer {
                         creditsCol = j + 1;
                         gradePointsCol = j + 2;
                         headerRowIndex = i;
-                        console.log(`🔍 Guessed structure: Course Code(${courseCodeCol}), Credits(${creditsCol}), Grade Points(${gradePointsCol})`);
+                        console.log(`Guessed structure: Course Code(${courseCodeCol}), Credits(${creditsCol}), Grade Points(${gradePointsCol})`);
                         break;
                     }
                 }
@@ -615,7 +615,7 @@ class GradeSheetAnalyzer {
         }
         
         if (courseCodeCol === -1 || creditsCol === -1 || gradePointsCol === -1) {
-            console.error('❌ Could not determine Excel file structure');
+            console.error('Could not determine Excel file structure');
             return;
         }
         
@@ -696,14 +696,14 @@ class GradeSheetAnalyzer {
             if (isFailedCourse && !isPrepCourse) {
                 // Assign standard credit hours for failed courses
                 credits = this.getStandardCredits(courseCode.toUpperCase());
-                console.log(`📉 Failed course detected (Excel): ${courseCode}, using standard credits: ${credits}`);
+                console.log(`Failed course detected (Excel): ${courseCode}, using standard credits: ${credits}`);
             }
             
             // Validate values
             if (isNaN(credits) || isNaN(gradePoints) || 
                 credits < 0 || credits > 10 || 
                 gradePoints < 0 || gradePoints > 4.0) {
-                console.log(`⚠️ Skipping invalid row: ${courseCode}, Credits: ${creditsValue}, Grade Points: ${gradePointsValue}`);
+                console.log(`Skipping invalid row: ${courseCode}, Credits: ${creditsValue}, Grade Points: ${gradePointsValue}`);
                 continue;
             }
             
@@ -856,7 +856,7 @@ class GradeSheetAnalyzer {
         // Update summary cards
         this.updateSummaryCards();
 
-        console.log(`📊 Updated course ${this.courses[courseIndex].courseCode}: Grade Points = ${gradePoints}, Quality Points = ${this.courses[courseIndex].qualityPoints.toFixed(2)}`);
+        console.log(`Updated course ${this.courses[courseIndex].courseCode}: Grade Points = ${gradePoints}, Quality Points = ${this.courses[courseIndex].qualityPoints.toFixed(2)}`);
     }
 
     /**
@@ -873,9 +873,9 @@ class GradeSheetAnalyzer {
         
         // Update display
         this.displayResults();
-        this.showSuccessMessage('✅ Reset to original grade points');
-        
-        console.log('🔄 Reset to original grade points');
+        this.showSuccessMessage('Reset to original grade points');
+
+        console.log('Reset to original grade points');
     }
 
     /**
@@ -944,8 +944,8 @@ class GradeSheetAnalyzer {
             // Save the file
             XLSX.writeFile(wb, filename);
 
-            this.showSuccessMessage('📊 Excel file exported successfully!');
-            console.log('📊 Course data exported to Excel:', filename);
+            this.showSuccessMessage('Excel file exported successfully!');
+            console.log('Course data exported to Excel:', filename);
 
         } catch (error) {
             console.error('Export error:', error);
@@ -1149,7 +1149,7 @@ class GradeSheetAnalyzer {
         this.displayResults();
 
         // Show success message
-        this.showSuccessMessage(`✅ Successfully added ${courseCode} to your course list!`);
+        this.showSuccessMessage(`Successfully added ${courseCode} to your course list!`);
 
         console.log(`➕ Added new course: ${courseCode}, Credits: ${credits}, Grade Points: ${gradePoints}`);
     }
@@ -1180,9 +1180,9 @@ class GradeSheetAnalyzer {
         this.displayResults();
 
         // Show success message
-        this.showSuccessMessage(`✅ Deleted course ${course.courseCode} successfully!`);
+        this.showSuccessMessage(`Deleted course ${course.courseCode} successfully!`);
 
-        console.log(`🗑️ Deleted course: ${course.courseCode}`);
+        console.log(`Deleted course: ${course.courseCode}`);
     }
 
     /**
@@ -1244,12 +1244,12 @@ class GradeSheetAnalyzer {
 
 // Initialize the application when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Initializing Grade Sheet Analyzer...');
+    console.log('Initializing Grade Sheet Analyzer...');
     window.analyzer = new GradeSheetAnalyzer();
     
     // Add some fun console art
     console.log(`
-    🎓 Grade Sheet Analyzer
+    Grade Sheet Analyzer
     =====================
     Built with PDF.js and modern web technologies
     Ready to analyze your academic journey!

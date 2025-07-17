@@ -33,20 +33,6 @@ A modern, client-side web application for analyzing PDF grade sheets. Extract co
 3. Upload your PDF grade sheet and analyze!
 
 
-## Project Structure
-
-```
-📁 should-i-retake/
-├── 📄 index.html          (Main HTML file - optimized)
-├── 📄 script.js           (Main JavaScript - complete functionality)
-├── 📄 styles.css          (Main stylesheet - cleaned)
-├── 📄 animations.css      (Animation styles - optimized)
-├── 📄 faq.html            (FAQ page - enhanced)
-├── 📄 README.md           (Documentation)
-├── 📄 LICENSE             (License file)
-└── 📄 .gitignore          (Git ignore rules)
-```
-
 ## Features in Detail
 
 ### Course Information Extraction
