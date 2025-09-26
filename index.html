@@ -13,9 +13,7 @@
       gtag('config', 'G-V8XF8E885L');
     </script>
 
-    <!-- Custom Styles (backup loading) -->
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="animations.css">
+    <!-- Custom Styles (removed duplicate loading) -->
     
     <!-- SEO Meta Tags -->
     <title>Should I Retake? | BRACU Retake & CGPA Calculator</title>
@@ -94,6 +92,10 @@
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+
+    <!-- Prefetch critical resources -->
+    <link rel="prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
+    <link rel="prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/should-i-retake/favicon.ico">
@@ -120,7 +122,7 @@
             line-height: 1.6;
             color: #cad3f5;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
         
         body.loaded {
@@ -255,23 +257,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- External Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Optimized font loading -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
+    <!-- Critical CSS inline (already present above) -->
     <!-- Preload critical CSS files -->
     <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="animations.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    
+
     <!-- Fallback for browsers that don't support preload -->
     <noscript>
         <link rel="stylesheet" href="styles.css">
         <link rel="stylesheet" href="animations.css">
     </noscript>
-    
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="animations.css">
 </head>
 <body>
     <!-- Initial loading screen to prevent FOUC -->
@@ -430,11 +428,12 @@
 
     </div>
 
-    <!-- SheetJS Library for Excel Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- Custom JavaScript -->
-    <script src="script.js"></script>
+    <!-- Defer external libraries for faster initial load -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Custom JavaScript with defer -->
+    <script defer src="script.js"></script>
     
     <!-- Loading state management -->
     <script>
@@ -451,33 +450,26 @@
             });
         }
         
-        // Hide loader and show content when everything is loaded
+        // Optimized loader management
         function hideLoader() {
             const loader = document.getElementById('initialLoader');
             const body = document.body;
-            
+
             if (loader && body) {
                 loader.classList.add('hidden');
                 body.classList.add('loaded');
             }
         }
-        
-        // Hide loader when DOM is ready and fonts are loaded
+
+        // Hide loader when DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                // Give a small delay to ensure fonts are loaded
-                setTimeout(hideLoader, 100);
-            });
+            document.addEventListener('DOMContentLoaded', hideLoader);
         } else {
-            // DOM is already ready
-            setTimeout(hideLoader, 100);
+            hideLoader();
         }
-        
-        // Additional safety: hide loader when window is fully loaded
-        window.addEventListener('load', hideLoader);
-        
-        // Hide loader after maximum 3 seconds as fallback
-        setTimeout(hideLoader, 3000);
+
+        // Fallback timeout
+        setTimeout(hideLoader, 2000);
     </script>
 </body>
 </html>

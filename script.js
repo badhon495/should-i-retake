@@ -98,8 +98,7 @@ class GradeSheetAnalyzer {
      * Show welcome message on page load
      */
     showWelcomeMessage() {
-        console.log('🎓 Grade Sheet Analyzer initialized!');
-        console.log('Upload your PDF grade sheet to get started.');
+        // Grade Sheet Analyzer initialized and ready
     }
 
     /**
@@ -1078,14 +1077,5 @@ class GradeSheetAnalyzer {
 
 // Initialize the application when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initializing Grade Sheet Analyzer...');
     window.analyzer = new GradeSheetAnalyzer();
-    
-    // Add some fun console art
-    console.log(`
-    Grade Sheet Analyzer
-    =====================
-    Built with PDF.js and modern web technologies
-    Ready to analyze your academic journey!
-    `);
 });

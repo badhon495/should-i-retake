@@ -727,7 +727,6 @@ body {
 /* Course Row Hover Effect for Manual Courses */
 .course-table tbody tr.manual-course:hover {
     background: rgba(198, 160, 246, 0.1);
-    transition: background 0.2s ease;
 }
 
 /* FAQ Section */
