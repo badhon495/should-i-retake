@@ -4,13 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V8XF8E885L"></script>
+    <!-- Google tag (gtag.js) - Fixed for GitHub Pages -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V8XF8E885L" onerror="console.log('GA failed to load')"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-V8XF8E885L');
+
+      try {
+        gtag('config', 'G-V8XF8E885L', {
+          'cookie_domain': 'none',
+          'cookie_flags': 'secure;samesite=strict',
+          'storage': 'none'
+        });
+      } catch (error) {
+        // Silently handle GA errors to prevent blocking
+      }
     </script>
 
     <!-- Custom Styles (removed duplicate loading) -->
@@ -98,12 +107,12 @@
     <link rel="prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/should-i-retake/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/should-i-retake/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/should-i-retake/favicon-16x16.png">
-    <link rel="icon" type="image/svg+xml" href="/should-i-retake/favicon.svg">
-    <link rel="apple-touch-icon" sizes="180x180" href="/should-i-retake/apple-touch-icon.png">
-    <link rel="shortcut icon" href="/should-i-retake/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="shortcut icon" href="favicon.ico">
 
     
     <!-- Critical CSS to prevent FOUC -->
@@ -437,18 +446,6 @@
     
     <!-- Loading state management -->
     <script>
-        // Service Worker registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/should-i-retake/sw.js')
-                    .then((registration) => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch((registrationError) => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
-        }
         
         // Optimized loader management
         function hideLoader() {

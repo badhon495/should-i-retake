@@ -10,7 +10,6 @@ Allow: /script.js
 Allow: /manifest.json
 Allow: /humans.txt
 Allow: /404.html
-Allow: /sw.js
 Allow: /browserconfig.xml
 
 # Disallow unnecessary files
