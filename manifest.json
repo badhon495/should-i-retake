@@ -1,7 +1,7 @@
 {
-  "name": "Should I Retake? - BRACU CGPA Calculator",
-  "short_name": "Should I Retake?",
-  "description": "CGPA calculator for BRAC University students. Upload grade sheets to calculate GPA, analyze grades, and determine if you should retake courses.",
+  "name": "Should I Retake? - BRACU Retake Calculator",
+  "short_name": "BRACU Retake",
+  "description": "BRACU retake calculator for BRAC University students. Understand retake policy, analyze grades, and determine if you should retake or repeat courses.",
   "start_url": "/should-i-retake/",
   "scope": "/should-i-retake/",
   "display": "standalone",
