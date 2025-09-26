@@ -3,7 +3,7 @@
 # Should I Retake?
 <div align="center">
 <h2 style="color: red; font-size: 24px;">
-🚨 THIS IS THE DEPLOYED VERSION OF MY PORTFOLIO WEBSITE 🚨
+🚨 THIS IS THE DEPLOYED VERSION OF THE should-i-retake WEBSITE 🚨
 </h2>
 <h3 style="color: red;">
 DO NOT COPY IT AS IT CONTAINS GOOGLE ANALYTICS AND OTHER PERSONAL CONFIGURATIONS THAT ARE NOT MEANT TO BE COPIED!
