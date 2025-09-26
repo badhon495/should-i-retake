@@ -1,6 +1,3 @@
-// PDF.js configuration
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
 /**
  * Grade Sheet Analyzer Class
  * Handles PDF upload, parsing, and course data extraction
@@ -102,6 +99,41 @@ class GradeSheetAnalyzer {
     }
 
     /**
+     * Check if PDF.js is ready
+     */
+    async ensurePDFJSReady() {
+        return new Promise((resolve) => {
+            if (typeof pdfjsLib !== 'undefined') {
+                resolve();
+                return;
+            }
+
+            // Update loading message for first-time users
+            const loadingContent = document.querySelector('.loading-content');
+            if (loadingContent) {
+                loadingContent.textContent = 'Loading PDF processing library...';
+            }
+
+            const checkInterval = setInterval(() => {
+                if (typeof pdfjsLib !== 'undefined') {
+                    clearInterval(checkInterval);
+                    // Reset loading message
+                    if (loadingContent) {
+                        loadingContent.textContent = 'Processing your grade sheet...';
+                    }
+                    resolve();
+                }
+            }, 50);
+
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                resolve();
+            }, 10000);
+        });
+    }
+
+    /**
      * Process uploaded PDF file
      */
     async processPDF(file) {
@@ -109,6 +141,9 @@ class GradeSheetAnalyzer {
             this.showLoading(true);
             this.hideError();
             this.hideResults();
+
+            // Ensure PDF.js is loaded
+            await this.ensurePDFJSReady();
 
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
@@ -1078,4 +1113,18 @@ class GradeSheetAnalyzer {
 // Initialize the application when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.analyzer = new GradeSheetAnalyzer();
+
+    // Pre-initialize PDF.js for faster first use
+    if (typeof pdfjsLib !== 'undefined') {
+        // Configure PDF.js worker immediately
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    } else {
+        // Wait for PDF.js to load and then configure
+        const waitForPDFJS = setInterval(() => {
+            if (typeof pdfjsLib !== 'undefined') {
+                clearInterval(waitForPDFJS);
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+        }, 100);
+    }
 });
