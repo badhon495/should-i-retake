@@ -1,91 +1,20 @@
 {
   "name": "Should I Retake? - BRACU CGPA Calculator",
   "short_name": "Should I Retake?",
-  "description": "Free BRACU CGPA calculator for BRAC University students. Upload PDF grade sheet or Excel file to calculate CGPA, analyze grades, and determine if you should retake courses. Features include grade analysis, course retake recommendations, and 100% client-side processing.",
-  "keywords": "bracu cgpa calculator, brac university cgpa calculator, bracu cg calculator, cgpa calculator bracu, brac cgpa calculator, bracu gpa calculator, bracu grade calculator, cgpa calculation bracu, should i retake, grade analysis tool, academic planning",
-  "icons": [
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='70' text-anchor='middle' fill='%238dd3e3' font-family='sans-serif' font-weight='bold'%3ERe%3C/text%3E%3C/svg%3E",
-      "sizes": "48x48",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='70' text-anchor='middle' fill='%238dd3e3' font-family='sans-serif' font-weight='bold'%3ERe%3C/text%3E%3C/svg%3E",
-      "sizes": "72x72",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='70' text-anchor='middle' fill='%238dd3e3' font-family='sans-serif' font-weight='bold'%3ERe%3C/text%3E%3C/svg%3E",
-      "sizes": "96x96",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='70' text-anchor='middle' fill='%238dd3e3' font-family='sans-serif' font-weight='bold'%3ERe%3C/text%3E%3C/svg%3E",
-      "sizes": "144x144",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='70' text-anchor='middle' fill='%238dd3e3' font-family='sans-serif' font-weight='bold'%3ERe%3C/text%3E%3C/svg%3E",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='70' text-anchor='middle' fill='%238dd3e3' font-family='sans-serif' font-weight='bold'%3ERe%3C/text%3E%3C/svg%3E",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "maskable any"
-    }
-  ],
+  "description": "CGPA calculator for BRAC University students. Upload grade sheets to calculate GPA, analyze grades, and determine if you should retake courses.",
   "start_url": "/should-i-retake/",
   "scope": "/should-i-retake/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "theme_color": "#8aadf4",
   "background_color": "#24273a",
-  "categories": ["education", "productivity", "utilities"],
-  "lang": "en-US",
-  "dir": "ltr",
-  "shortcuts": [
+  "theme_color": "#8dd3e3",
+  "icons": [
     {
-      "name": "Upload Grade Sheet",
-      "short_name": "Upload",
-      "description": "Upload your PDF grade sheet or Excel file",
-      "url": "/should-i-retake/#upload",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='70' text-anchor='middle' fill='%238dd3e3' font-family='sans-serif' font-weight='bold'%3E📁%3C/text%3E%3C/svg%3E",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
-    },
-    {
-      "name": "FAQ",
-      "short_name": "Help",
-      "description": "Get help and frequently asked questions",
-      "url": "/should-i-retake/faq.html",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='70' text-anchor='middle' fill='%238dd3e3' font-family='sans-serif' font-weight='bold'%3E❓%3C/text%3E%3C/svg%3E",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='70' text-anchor='middle' fill='%238dd3e3' font-family='sans-serif' font-weight='bold'%3ERe%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ],
-  "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "protocol_handlers": [
-    {
-      "protocol": "web+cgpa",
-      "url": "/should-i-retake/?source=%s"
-    }
-  ]
+  "categories": ["education", "utilities"],
+  "lang": "en",
+  "orientation": "portrait-primary"
 }
