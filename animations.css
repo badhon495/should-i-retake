@@ -1,11 +1,7 @@
-/* Animation performance optimizations */
-* {
-    will-change: auto;
-}
-
+/* Animation performance optimizations - only apply will-change when needed */
 /* Reduce animations on slower devices */
 @media (prefers-reduced-motion: reduce) {
-    * {
+    *, *::before, *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;

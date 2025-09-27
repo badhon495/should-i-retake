@@ -2,7 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+
+    <!-- Custom Styles (removed duplicate loading) -->
+    
     <title>Should I Retake?</title>
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- DNS Prefetch for external resources -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+
+    <!-- Preload critical resources for immediate availability -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" as="script">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js" as="script">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" as="script">
+    
 
     
     <!-- Critical CSS to prevent FOUC -->
@@ -21,7 +42,7 @@
             line-height: 1.6;
             color: #cad3f5;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
         
         body.loaded {
@@ -81,20 +102,32 @@
         }
     </style>
     
-    <!-- External Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="animations.css">
+    <!-- Preload fonts for better performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Optimized font loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Critical CSS inline (already present above) -->
+    <!-- Preload critical CSS files -->
+    <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="animations.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+    <!-- Fallback for browsers that don't support preload -->
+    <noscript>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="animations.css">
+    </noscript>
 </head>
 <body>
     <!-- Initial loading screen to prevent FOUC -->
     <div class="initial-loader" id="initialLoader">
         <div class="loader-content">
-            <h1>
+            <h2>
                 Should I Retake?
-            </h1>
+            </h2>
             <div class="loader-spinner"></div>
             <p>Loading your grade analysis tool...</p>
         </div>
@@ -107,7 +140,7 @@
             <h1>
                 Should I Retake?
             </h1>
-            <p>Upload your BRACU grade sheet to determine if you should retake that course</p>
+            <p>Upload your BRACU grade sheet to analyze your performance and determine if you should retake or repeat courses according to BRAC University retake policy</p>
             <div style="margin-top: 1.5rem; text-align: center;">
                 <button onclick="window.open('https://badhon495.github.io/bracu-cgpa-calculator/', '_blank')" class="simple-calculator-btn">
                     Simple Version
@@ -245,41 +278,36 @@
 
     </div>
 
-    <!-- SheetJS Library for Excel Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- Custom JavaScript -->
-    <script src="script.js"></script>
+    <!-- Load PDF.js immediately for first-time users -->
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Custom JavaScript with defer -->
+    <script defer src="script.js"></script>
     
     <!-- Loading state management -->
     <script>
-        // Hide loader and show content when everything is loaded
+        
+        // Optimized loader management
         function hideLoader() {
             const loader = document.getElementById('initialLoader');
             const body = document.body;
-            
+
             if (loader && body) {
                 loader.classList.add('hidden');
                 body.classList.add('loaded');
             }
         }
-        
-        // Hide loader when DOM is ready and fonts are loaded
+
+        // Hide loader when DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                // Give a small delay to ensure fonts are loaded
-                setTimeout(hideLoader, 100);
-            });
+            document.addEventListener('DOMContentLoaded', hideLoader);
         } else {
-            // DOM is already ready
-            setTimeout(hideLoader, 100);
+            hideLoader();
         }
-        
-        // Additional safety: hide loader when window is fully loaded
-        window.addEventListener('load', hideLoader);
-        
-        // Hide loader after maximum 3 seconds as fallback
-        setTimeout(hideLoader, 3000);
+
+        // Fallback timeout
+        setTimeout(hideLoader, 2000);
     </script>
 </body>
 </html>
