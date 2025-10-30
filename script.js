@@ -959,6 +959,11 @@ class GradeSheetAnalyzer {
             qualityPointsPreview.textContent = qualityPoints.toFixed(2);
         };
 
+        // Pre-fill default values for ease of manual course entry
+        creditsInput.value = '3.00';
+        gradePointsInput.value = '4.00';
+        updateQualityPointsPreview();
+
         creditsInput.addEventListener('input', updateQualityPointsPreview);
         gradePointsInput.addEventListener('input', updateQualityPointsPreview);
 
