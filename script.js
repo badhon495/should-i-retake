@@ -262,7 +262,7 @@ class GradeSheetAnalyzer {
         this.originalCourses = [];
 
         // Cache regex patterns for better performance
-        const courseCodePattern = /^([A-Z]{2,4}\d{3})/;
+        const courseCodePattern = /^([A-Z]{2,4}\d{3}[A-Z]?[A-Z0-9]?)/;
         const numbersPattern = /\d+\.\d+/g;
         const retakePatterns = {
             rp: /\b(RP|\(RP\)|\( RP \))\b/i,
@@ -910,7 +910,7 @@ class GradeSheetAnalyzer {
             <td>
                 <input type="text" 
                        class="course-code-input" 
-                       placeholder="e.g., CSE101" 
+                       placeholder="e.g., CSE101, EEE102L" 
                        maxlength="10"
                        style="text-transform: uppercase;">
             </td>
@@ -987,8 +987,8 @@ class GradeSheetAnalyzer {
 
         if (!courseCode) {
             errors.push('Course code is required');
-        } else if (!/^[A-Z]{2,4}\d{3}$/.test(courseCode)) {
-            errors.push('Course code must be in format like CSE110, MAT215, etc.');
+        } else if (!/^[A-Z]{2,4}\d{3}[A-Z]?[A-Z0-9]?$/.test(courseCode)) {
+            errors.push('Course code must be in format like CSE110, EEE102L, MAT215, etc.');
         }
 
         // Check for duplicate course code
