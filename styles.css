@@ -7,7 +7,7 @@
 
 /* Improve loading performance */
 html {
-    font-display: swap;
+    font-display: optional;
 }
 
 body {
