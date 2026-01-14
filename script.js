@@ -727,10 +727,6 @@ class GradeSheetAnalyzer {
         this.courses[courseIndex].gradePoints = gradePoints;
         this.courses[courseIndex].qualityPoints = this.courses[courseIndex].credits * gradePoints;
 
-        // Update quality points display in the table
-        const row = document.querySelector(`input[data-course-index="${courseIndex}"]`).closest('tr');
-        row.querySelector('.quality-points').textContent = this.courses[courseIndex].qualityPoints.toFixed(2);
-
         // Update summary cards
         this.updateSummaryCards();
 
@@ -768,7 +764,6 @@ class GradeSheetAnalyzer {
                 'Course Code': course.courseCode,
                 'Credits Earned': course.credits,
                 'Grade Points': course.gradePoints.toFixed(2),
-                'Quality Points': course.qualityPoints.toFixed(2),
                 'Type': course.isManuallyAdded ? 'Manual' : (course.isRetake ? `Retake (${course.retakeType || 'RP/RT'})` : 'From Grade Sheet')
             }));
 
@@ -783,15 +778,15 @@ class GradeSheetAnalyzer {
 
             const summaryData = [
                 {},
-                { 'Course Code': 'SUMMARY', 'Credits Earned': '', 'Grade Points': '', 'Quality Points': '', 'Type': '' },
-                { 'Course Code': 'Total Courses', 'Credits Earned': this.courses.length, 'Grade Points': '', 'Quality Points': '', 'Type': '' },
-                { 'Course Code': 'Credit Courses', 'Credits Earned': creditCourses, 'Grade Points': '', 'Quality Points': '', 'Type': '' },
-                { 'Course Code': 'Total Credits', 'Credits Earned': totalCredits.toFixed(2), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
-                { 'Course Code': 'Earned Credits', 'Credits Earned': earnedCredits.toFixed(2), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
-                { 'Course Code': 'Current CGPA', 'Credits Earned': currentCGPA.toFixed(4), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
-                { 'Course Code': 'Current Actual CGPA', 'Credits Earned': currentActualCGPA.toFixed(2), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
-                { 'Course Code': 'Dream CGPA', 'Credits Earned': dreamCGPA.toFixed(4), 'Grade Points': '', 'Quality Points': '', 'Type': '' },
-                { 'Course Code': 'Dream Actual CGPA', 'Credits Earned': dreamActualCGPA.toFixed(2), 'Grade Points': '', 'Quality Points': '', 'Type': '' }
+                { 'Course Code': 'SUMMARY', 'Credits Earned': '', 'Grade Points': '', 'Type': '' },
+                { 'Course Code': 'Total Courses', 'Credits Earned': this.courses.length, 'Grade Points': '', 'Type': '' },
+                { 'Course Code': 'Credit Courses', 'Credits Earned': creditCourses, 'Grade Points': '', 'Type': '' },
+                { 'Course Code': 'Total Credits', 'Credits Earned': totalCredits.toFixed(2), 'Grade Points': '', 'Type': '' },
+                { 'Course Code': 'Earned Credits', 'Credits Earned': earnedCredits.toFixed(2), 'Grade Points': '', 'Type': '' },
+                { 'Course Code': 'Current CGPA', 'Credits Earned': currentCGPA.toFixed(4), 'Grade Points': '', 'Type': '' },
+                { 'Course Code': 'Current Actual CGPA', 'Credits Earned': currentActualCGPA.toFixed(2), 'Grade Points': '', 'Type': '' },
+                { 'Course Code': 'Dream CGPA', 'Credits Earned': dreamCGPA.toFixed(4), 'Grade Points': '', 'Type': '' },
+                { 'Course Code': 'Dream Actual CGPA', 'Credits Earned': dreamActualCGPA.toFixed(2), 'Grade Points': '', 'Type': '' }
             ];
 
             // Combine course data with summary
@@ -807,7 +802,6 @@ class GradeSheetAnalyzer {
                 { wch: 15 }, // Course Code
                 { wch: 12 }, // Credits Earned
                 { wch: 12 }, // Grade Points
-                { wch: 12 }, // Quality Points
                 { wch: 15 }  // Type
             ];
 
@@ -858,9 +852,6 @@ class GradeSheetAnalyzer {
                            step="0.01" 
                            data-course-index="${index}"
                            onchange="analyzer.updateGradePoints(${index}, this.value)">
-                </td>
-                <td class="quality-points">
-                    <span class="quality-points-value">${course.qualityPoints.toFixed(2)}</span>
                 </td>
                 <td class="actions-column">
                     <button class="delete-course-btn" onclick="analyzer.deleteCourse(${index})" title="Delete Course">Delete</button>
@@ -930,9 +921,6 @@ class GradeSheetAnalyzer {
                        max="4" 
                        step="0.01">
             </td>
-            <td class="quality-points">
-                <span class="quality-points-preview">-</span>
-            </td>
             <td class="actions-column">
                 <div class="save-cancel-buttons">
                     <button class="save-btn">Save</button>
@@ -947,25 +935,12 @@ class GradeSheetAnalyzer {
             e.target.value = e.target.value.toUpperCase();
         });
 
-        // Add event listeners for quality points preview calculation
         const creditsInput = row.querySelector('.credits-input');
         const gradePointsInput = row.querySelector('.grade-points-input');
-        const qualityPointsPreview = row.querySelector('.quality-points-preview');
-
-        const updateQualityPointsPreview = () => {
-            const credits = parseFloat(creditsInput.value) || 0;
-            const gradePoints = parseFloat(gradePointsInput.value) || 0;
-            const qualityPoints = credits * gradePoints;
-            qualityPointsPreview.textContent = qualityPoints.toFixed(2);
-        };
 
         // Pre-fill default values for ease of manual course entry
         creditsInput.value = '3.00';
         gradePointsInput.value = '4.00';
-        updateQualityPointsPreview();
-
-        creditsInput.addEventListener('input', updateQualityPointsPreview);
-        gradePointsInput.addEventListener('input', updateQualityPointsPreview);
 
         tableBody.appendChild(row);
         
