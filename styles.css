@@ -7,7 +7,7 @@
 
 /* Improve loading performance */
 html {
-    font-display: swap;
+    font-display: optional;
 }
 
 body {
@@ -302,6 +302,13 @@ body {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Grade input focus effect */
+.grade-input:focus {
+    border-color: #c6a0f6 !important;
+    box-shadow: 0 0 0 3px rgba(198, 160, 246, 0.2) !important;
+    outline: none;
+}
+
 /* Controls section */
 .controls-section {
     display: flex;
@@ -450,19 +457,6 @@ body {
 .course-table .course-code {
     font-weight: 600;
     color: #8aadf4;
-}
-
-/* Quality Points Cell Layout */
-.quality-points {
-    position: relative;
-    text-align: center;
-    min-width: 120px;
-    vertical-align: middle;
-}
-
-.quality-points-value {
-    display: inline;
-    vertical-align: middle;
 }
 
 /* Add Course Simple Button */
