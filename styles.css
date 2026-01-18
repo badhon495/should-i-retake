@@ -302,6 +302,13 @@ body {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Grade input focus effect */
+.grade-input:focus {
+    border-color: #c6a0f6 !important;
+    box-shadow: 0 0 0 3px rgba(198, 160, 246, 0.2) !important;
+    outline: none;
+}
+
 /* Controls section */
 .controls-section {
     display: flex;

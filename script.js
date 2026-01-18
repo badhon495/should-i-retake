@@ -709,6 +709,26 @@ class GradeSheetAnalyzer {
     }
 
     /**
+     * Debounce timer for real-time updates
+     */
+    debounceTimer = null;
+
+    /**
+     * Real-time grade point update with debouncing
+     */
+    updateGradePointsRealtime(courseIndex, newGradePoints) {
+        // Clear previous timer
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+        }
+        
+        // Set new timer - update after 500ms of no typing
+        this.debounceTimer = setTimeout(() => {
+            this.updateGradePoints(courseIndex, newGradePoints);
+        }, 500);
+    }
+
+    /**
      * Update grade points for a specific course
      */
     updateGradePoints(courseIndex, newGradePoints) {
@@ -851,7 +871,10 @@ class GradeSheetAnalyzer {
                            max="4" 
                            step="0.01" 
                            data-course-index="${index}"
-                           onchange="analyzer.updateGradePoints(${index}, this.value)">
+                           title="Updates automatically as you type"
+                           oninput="analyzer.updateGradePointsRealtime(${index}, this.value)"
+                           onchange="analyzer.updateGradePoints(${index}, this.value)"
+                           onkeypress="if(event.key==='Enter'){this.blur();}">
                 </td>
                 <td class="actions-column">
                     <button class="delete-course-btn" onclick="analyzer.deleteCourse(${index})" title="Delete Course">Delete</button>
