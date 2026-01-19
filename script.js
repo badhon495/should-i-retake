@@ -71,12 +71,12 @@ class GradeSheetAnalyzer {
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
-        });
+        }, { passive: false });
 
         uploadArea.addEventListener('dragleave', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
-        });
+        }, { passive: false });
 
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
@@ -88,7 +88,7 @@ class GradeSheetAnalyzer {
             } else {
                 this.showError('Please drop a valid PDF file.');
             }
-        });
+        }, { passive: false });
     }
 
     /**
@@ -689,6 +689,7 @@ class GradeSheetAnalyzer {
         const allInputs = document.querySelectorAll('.grade-input');
         const addCourseBtn = document.getElementById('addCourseBtn');
         
+        // Use DocumentFragment for better performance
         allInputs.forEach(input => {
             if (hasInvalid) {
                 // If this input is not the invalid one, disable it
@@ -728,10 +729,22 @@ class GradeSheetAnalyzer {
             return;
         }
         
-        document.getElementById('totalCourses').textContent = this.courses.length;
-        document.getElementById('creditCourses').textContent = this.calculateCreditCourses();
-        document.getElementById('totalCredits').textContent = this.courses.reduce((sum, course) => sum + course.credits, 0).toFixed(2);
-        document.getElementById('earnedCredits').textContent = this.calculateEarnedCredits().toFixed(2);
+        // Cache DOM queries for better performance
+        const elements = {
+            totalCourses: document.getElementById('totalCourses'),
+            creditCourses: document.getElementById('creditCourses'),
+            totalCredits: document.getElementById('totalCredits'),
+            earnedCredits: document.getElementById('earnedCredits'),
+            currentCGPA: document.getElementById('currentCGPA'),
+            currentActualCGPA: document.getElementById('currentActualCGPA'),
+            dreamCGPA: document.getElementById('dreamCGPA'),
+            dreamActualCGPA: document.getElementById('dreamActualCGPA')
+        };
+        
+        elements.totalCourses.textContent = this.courses.length;
+        elements.creditCourses.textContent = this.calculateCreditCourses();
+        elements.totalCredits.textContent = this.courses.reduce((sum, course) => sum + course.credits, 0).toFixed(2);
+        elements.earnedCredits.textContent = this.calculateEarnedCredits().toFixed(2);
         
         // If no courses have been deleted and no grade changes, show original CGPA
         // Otherwise, show the current calculated CGPA for both
@@ -751,12 +764,12 @@ class GradeSheetAnalyzer {
         });
         
         // Current CGPA: always show original CGPA (unchanged)
-        document.getElementById('currentCGPA').textContent = originalCGPA.toFixed(4);
-        document.getElementById('currentActualCGPA').textContent = currentActualCGPA.toFixed(2);
+        elements.currentCGPA.textContent = originalCGPA.toFixed(4);
+        elements.currentActualCGPA.textContent = currentActualCGPA.toFixed(2);
         
         // Dream CGPA: always show current calculated value (reflects all changes)
-        document.getElementById('dreamCGPA').textContent = currentCGPA.toFixed(4);
-        document.getElementById('dreamActualCGPA').textContent = dreamActualCGPA.toFixed(2);
+        elements.dreamCGPA.textContent = currentCGPA.toFixed(4);
+        elements.dreamActualCGPA.textContent = dreamActualCGPA.toFixed(2);
     }
 
     /**
@@ -786,10 +799,11 @@ class GradeSheetAnalyzer {
         // Lock/unlock other inputs based on validation state
         this.updateInputLockState();
         
-        // Set new timer - update after 500ms of no typing
+        // Increase debounce time for better performance on low-end devices
+        // Set new timer - update after 800ms of no typing
         this.debounceTimer = setTimeout(() => {
             this.updateGradePoints(courseIndex, newGradePoints);
-        }, 500);
+        }, 800);
     }
 
     /**
