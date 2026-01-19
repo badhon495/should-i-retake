@@ -674,9 +674,60 @@ class GradeSheetAnalyzer {
     }
 
     /**
+     * Check if there are any invalid inputs in the table
+     */
+    hasInvalidInputs() {
+        const invalidInputs = document.querySelectorAll('.grade-input.invalid-input');
+        return invalidInputs.length > 0;
+    }
+
+    /**
+     * Lock or unlock input fields based on validation state
+     */
+    updateInputLockState() {
+        const hasInvalid = this.hasInvalidInputs();
+        const allInputs = document.querySelectorAll('.grade-input');
+        const addCourseBtn = document.getElementById('addCourseBtn');
+        
+        allInputs.forEach(input => {
+            if (hasInvalid) {
+                // If this input is not the invalid one, disable it
+                if (!input.classList.contains('invalid-input')) {
+                    input.disabled = true;
+                    input.classList.add('locked-input');
+                }
+            } else {
+                // Re-enable all inputs
+                input.disabled = false;
+                input.classList.remove('locked-input');
+            }
+        });
+        
+        // Disable/enable add course button
+        if (addCourseBtn) {
+            addCourseBtn.disabled = hasInvalid;
+            if (hasInvalid) {
+                addCourseBtn.classList.add('disabled');
+            } else {
+                addCourseBtn.classList.remove('disabled');
+            }
+        }
+    }
+
+    /**
      * Update summary cards with current values
      */
     updateSummaryCards() {
+        // Check for invalid inputs before calculating
+        if (this.hasInvalidInputs()) {
+            // Show error message and prevent calculation
+            const summaryCards = document.querySelectorAll('.summary-card .value');
+            summaryCards.forEach(card => {
+                card.textContent = '--';
+            });
+            return;
+        }
+        
         document.getElementById('totalCourses').textContent = this.courses.length;
         document.getElementById('creditCourses').textContent = this.calculateCreditCourses();
         document.getElementById('totalCredits').textContent = this.courses.reduce((sum, course) => sum + course.credits, 0).toFixed(2);
@@ -722,6 +773,19 @@ class GradeSheetAnalyzer {
             clearTimeout(this.debounceTimer);
         }
         
+        // Validate and update UI immediately for visual feedback
+        const input = document.querySelector(`input[data-course-index="${courseIndex}"]`);
+        const gradePoints = parseFloat(newGradePoints);
+        
+        if (isNaN(gradePoints) || gradePoints < 0 || gradePoints > 4) {
+            input.classList.add('invalid-input');
+        } else {
+            input.classList.remove('invalid-input');
+        }
+        
+        // Lock/unlock other inputs based on validation state
+        this.updateInputLockState();
+        
         // Set new timer - update after 500ms of no typing
         this.debounceTimer = setTimeout(() => {
             this.updateGradePoints(courseIndex, newGradePoints);
@@ -733,22 +797,27 @@ class GradeSheetAnalyzer {
      */
     updateGradePoints(courseIndex, newGradePoints) {
         const gradePoints = parseFloat(newGradePoints);
+        const input = document.querySelector(`input[data-course-index="${courseIndex}"]`);
         
         // Validate grade points
         if (isNaN(gradePoints) || gradePoints < 0 || gradePoints > 4) {
-            this.showError('Grade points must be between 0.00 and 4.00');
-            // Reset to original value
-            const input = document.querySelector(`input[data-course-index="${courseIndex}"]`);
-            input.value = this.courses[courseIndex].gradePoints.toFixed(2);
+            input.classList.add('invalid-input');
+            this.showError('Grade points must be between 0.00 and 4.00. Please fix invalid inputs to calculate results.');
             return;
         }
 
+        // Remove invalid styling if input is now valid
+        input.classList.remove('invalid-input');
+        
         // Update course data
         this.courses[courseIndex].gradePoints = gradePoints;
         this.courses[courseIndex].qualityPoints = this.courses[courseIndex].credits * gradePoints;
 
         // Update summary cards
         this.updateSummaryCards();
+        
+        // Update input lock state
+        this.updateInputLockState();
 
     }
 
@@ -767,6 +836,9 @@ class GradeSheetAnalyzer {
         // Update display
         this.displayResults();
         this.showSuccessMessage('Reset to original grade points');
+        
+        // Clear any locked state
+        this.updateInputLockState();
     }
 
     /**
