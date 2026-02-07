@@ -970,12 +970,6 @@ class GradeSheetAnalyzer {
         });
 
         this.showResults();
-        
-        // Scroll to results
-        document.getElementById('resultsSection').scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-        });
     }
 
     /**
