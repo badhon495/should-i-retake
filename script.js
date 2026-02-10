@@ -945,7 +945,6 @@ class GradeSheetAnalyzer {
                 <td class="course-code">
                     ${course.courseCode}
                     ${course.isManuallyAdded ? '<span class="manual-course-tag">Manual</span>' : ''}
-                    ${course.isRetake ? `<span class="retake-course-tag">(${this.getRetakeType(course, index)})</span>` : ''}
                     ${course.isFailed ? '<span class="failed-course-tag">(F)</span>' : ''}
                 </td>
                 <td>${course.credits.toFixed(2)}</td>
