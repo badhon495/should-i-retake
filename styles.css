@@ -10,6 +10,25 @@ html {
     font-display: optional;
 }
 
+/* Reduce animations on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Use CSS containment for better performance */
+.summary-card,
+.table-card,
+.upload-card {
+    contain: layout style paint;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: #24273a;
@@ -74,6 +93,17 @@ body {
 .simple-calculator-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(125, 196, 228, 0.4);
+}
+
+/* Disable hover effects on touch devices for better performance */
+@media (hover: none) and (pointer: coarse) {
+    .simple-calculator-btn:hover,
+    .upload-card:hover,
+    .summary-card:hover,
+    .add-course-simple-btn:hover {
+        transform: none;
+        box-shadow: none;
+    }
 }
 
 .simple-calculator-btn:active {
@@ -361,6 +391,7 @@ body {
     background: #181926;
     color: #cad3f5;
     transition: all 0.3s ease;
+    will-change: border-color, background;
 }
 
 /* Remove spinner arrows from number inputs */
@@ -395,6 +426,42 @@ body {
     background: #1e2030;
 }
 
+/* Invalid input styling */
+.grade-input.invalid-input {
+    border-color: #ed8796;
+    background: rgba(237, 135, 150, 0.1);
+}
+
+/* Only apply shake animation on devices that support animations */
+@media (prefers-reduced-motion: no-preference) {
+    .grade-input.invalid-input {
+        animation: shake 0.4s ease;
+    }
+}
+
+.grade-input.invalid-input:focus {
+    border-color: #ed8796;
+    box-shadow: 0 0 0 3px rgba(237, 135, 150, 0.3);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Locked input styling */
+.grade-input.locked-input {
+    background: rgba(91, 96, 120, 0.2);
+    cursor: not-allowed;
+    opacity: 0.6;
+    border-color: #5b6078;
+}
+
+.grade-input.locked-input:hover {
+    border-color: #5b6078;
+}
+
 .editable-hint {
     font-size: 0.8rem;
     opacity: 0.7;
@@ -424,6 +491,8 @@ body {
 
 .table-container {
     overflow-x: auto;
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .course-table {
@@ -459,6 +528,19 @@ body {
     color: #8aadf4;
 }
 
+/* Quality Points Cell Layout */
+.quality-points {
+    position: relative;
+    text-align: center;
+    min-width: 120px;
+    vertical-align: middle;
+}
+
+.quality-points-value {
+    display: inline;
+    vertical-align: middle;
+}
+
 /* Add Course Simple Button */
 .add-course-section {
     margin-top: 1.5rem;
@@ -486,6 +568,21 @@ body {
 
 .add-course-simple-btn:active {
     transform: translateY(0);
+}
+
+.add-course-simple-btn:disabled,
+.add-course-simple-btn.disabled {
+    background: linear-gradient(135deg, #5b6078, #6e738d);
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
+    box-shadow: none;
+}
+
+.add-course-simple-btn:disabled:hover,
+.add-course-simple-btn.disabled:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 /* Editable table row styles */
