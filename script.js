@@ -71,12 +71,12 @@ class GradeSheetAnalyzer {
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
-        });
+        }, { passive: false });
 
         uploadArea.addEventListener('dragleave', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
-        });
+        }, { passive: false });
 
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
@@ -88,7 +88,7 @@ class GradeSheetAnalyzer {
             } else {
                 this.showError('Please drop a valid PDF file.');
             }
-        });
+        }, { passive: false });
     }
 
     /**
@@ -303,6 +303,7 @@ class GradeSheetAnalyzer {
                             courseCode,
                             credits,
                             gradePoints,
+                            qualityPoints: credits * gradePoints,
                             isRetake,
                             retakeType: isRetake ? (hasRP && hasRT ? 'RP/RT' : (hasRP ? 'RP' : 'RT')) : null,
                             isFailed: isFailedCourse && !isPrepCourse
@@ -456,6 +457,7 @@ class GradeSheetAnalyzer {
                             courseCode: word,
                             credits,
                             gradePoints,
+                            qualityPoints: credits * gradePoints,
                             isRetake,
                             retakeType: isRetake ? (hasRP && hasRT ? 'RP/RT' : (hasRP ? 'RP' : 'RT')) : null,
                             isFailed: isFailedCourse && !isPrepCourse
@@ -590,6 +592,7 @@ class GradeSheetAnalyzer {
                 courseCode: courseCode.toUpperCase(),
                 credits,
                 gradePoints,
+                qualityPoints: credits * gradePoints,
                 isManuallyAdded: false,
                 isRetake,
                 retakeType,
@@ -610,7 +613,7 @@ class GradeSheetAnalyzer {
     calculateCGPA() {
         if (this.courses.length === 0) return 0;
         
-        const totalQualityPoints = this.courses.reduce((sum, course) => sum + (course.credits * course.gradePoints), 0);
+        const totalQualityPoints = this.courses.reduce((sum, course) => sum + course.qualityPoints, 0);
         const totalCredits = this.courses.reduce((sum, course) => sum + course.credits, 0);
         
         return totalCredits > 0 ? (totalQualityPoints / totalCredits) : 0;
@@ -622,7 +625,7 @@ class GradeSheetAnalyzer {
     calculateOriginalCGPA() {
         if (this.originalCourses.length === 0) return 0;
         
-        const totalQualityPoints = this.originalCourses.reduce((sum, course) => sum + (course.credits * course.gradePoints), 0);
+        const totalQualityPoints = this.originalCourses.reduce((sum, course) => sum + course.qualityPoints, 0);
         const totalCredits = this.originalCourses.reduce((sum, course) => sum + course.credits, 0);
         
         return totalCredits > 0 ? (totalQualityPoints / totalCredits) : 0;
@@ -671,13 +674,77 @@ class GradeSheetAnalyzer {
     }
 
     /**
+     * Check if there are any invalid inputs in the table
+     */
+    hasInvalidInputs() {
+        const invalidInputs = document.querySelectorAll('.grade-input.invalid-input');
+        return invalidInputs.length > 0;
+    }
+
+    /**
+     * Lock or unlock input fields based on validation state
+     */
+    updateInputLockState() {
+        const hasInvalid = this.hasInvalidInputs();
+        const allInputs = document.querySelectorAll('.grade-input');
+        const addCourseBtn = document.getElementById('addCourseBtn');
+        
+        // Use DocumentFragment for better performance
+        allInputs.forEach(input => {
+            if (hasInvalid) {
+                // If this input is not the invalid one, disable it
+                if (!input.classList.contains('invalid-input')) {
+                    input.disabled = true;
+                    input.classList.add('locked-input');
+                }
+            } else {
+                // Re-enable all inputs
+                input.disabled = false;
+                input.classList.remove('locked-input');
+            }
+        });
+        
+        // Disable/enable add course button
+        if (addCourseBtn) {
+            addCourseBtn.disabled = hasInvalid;
+            if (hasInvalid) {
+                addCourseBtn.classList.add('disabled');
+            } else {
+                addCourseBtn.classList.remove('disabled');
+            }
+        }
+    }
+
+    /**
      * Update summary cards with current values
      */
     updateSummaryCards() {
-        document.getElementById('totalCourses').textContent = this.courses.length;
-        document.getElementById('creditCourses').textContent = this.calculateCreditCourses();
-        document.getElementById('totalCredits').textContent = this.courses.reduce((sum, course) => sum + course.credits, 0).toFixed(2);
-        document.getElementById('earnedCredits').textContent = this.calculateEarnedCredits().toFixed(2);
+        // Check for invalid inputs before calculating
+        if (this.hasInvalidInputs()) {
+            // Show error message and prevent calculation
+            const summaryCards = document.querySelectorAll('.summary-card .value');
+            summaryCards.forEach(card => {
+                card.textContent = '--';
+            });
+            return;
+        }
+        
+        // Cache DOM queries for better performance
+        const elements = {
+            totalCourses: document.getElementById('totalCourses'),
+            creditCourses: document.getElementById('creditCourses'),
+            totalCredits: document.getElementById('totalCredits'),
+            earnedCredits: document.getElementById('earnedCredits'),
+            currentCGPA: document.getElementById('currentCGPA'),
+            currentActualCGPA: document.getElementById('currentActualCGPA'),
+            dreamCGPA: document.getElementById('dreamCGPA'),
+            dreamActualCGPA: document.getElementById('dreamActualCGPA')
+        };
+        
+        elements.totalCourses.textContent = this.courses.length;
+        elements.creditCourses.textContent = this.calculateCreditCourses();
+        elements.totalCredits.textContent = this.courses.reduce((sum, course) => sum + course.credits, 0).toFixed(2);
+        elements.earnedCredits.textContent = this.calculateEarnedCredits().toFixed(2);
         
         // If no courses have been deleted and no grade changes, show original CGPA
         // Otherwise, show the current calculated CGPA for both
@@ -697,12 +764,12 @@ class GradeSheetAnalyzer {
         });
         
         // Current CGPA: always show original CGPA (unchanged)
-        document.getElementById('currentCGPA').textContent = originalCGPA.toFixed(4);
-        document.getElementById('currentActualCGPA').textContent = currentActualCGPA.toFixed(2);
+        elements.currentCGPA.textContent = originalCGPA.toFixed(4);
+        elements.currentActualCGPA.textContent = currentActualCGPA.toFixed(2);
         
         // Dream CGPA: always show current calculated value (reflects all changes)
-        document.getElementById('dreamCGPA').textContent = currentCGPA.toFixed(4);
-        document.getElementById('dreamActualCGPA').textContent = dreamActualCGPA.toFixed(2);
+        elements.dreamCGPA.textContent = currentCGPA.toFixed(4);
+        elements.dreamActualCGPA.textContent = dreamActualCGPA.toFixed(2);
     }
 
     /**
@@ -719,10 +786,24 @@ class GradeSheetAnalyzer {
             clearTimeout(this.debounceTimer);
         }
         
-        // Set new timer - update after 500ms of no typing
+        // Validate and update UI immediately for visual feedback
+        const input = document.querySelector(`input[data-course-index="${courseIndex}"]`);
+        const gradePoints = parseFloat(newGradePoints);
+        
+        if (isNaN(gradePoints) || gradePoints < 0 || gradePoints > 4) {
+            input.classList.add('invalid-input');
+        } else {
+            input.classList.remove('invalid-input');
+        }
+        
+        // Lock/unlock other inputs based on validation state
+        this.updateInputLockState();
+        
+        // Increase debounce time for better performance on low-end devices
+        // Set new timer - update after 800ms of no typing
         this.debounceTimer = setTimeout(() => {
             this.updateGradePoints(courseIndex, newGradePoints);
-        }, 500);
+        }, 800);
     }
 
     /**
@@ -730,21 +811,27 @@ class GradeSheetAnalyzer {
      */
     updateGradePoints(courseIndex, newGradePoints) {
         const gradePoints = parseFloat(newGradePoints);
+        const input = document.querySelector(`input[data-course-index="${courseIndex}"]`);
         
         // Validate grade points
         if (isNaN(gradePoints) || gradePoints < 0 || gradePoints > 4) {
-            this.showError('Grade points must be between 0.00 and 4.00');
-            // Reset to original value
-            const input = document.querySelector(`input[data-course-index="${courseIndex}"]`);
-            input.value = this.courses[courseIndex].gradePoints.toFixed(2);
+            input.classList.add('invalid-input');
+            this.showError('Grade points must be between 0.00 and 4.00. Please fix invalid inputs to calculate results.');
             return;
         }
 
+        // Remove invalid styling if input is now valid
+        input.classList.remove('invalid-input');
+        
         // Update course data
         this.courses[courseIndex].gradePoints = gradePoints;
+        this.courses[courseIndex].qualityPoints = this.courses[courseIndex].credits * gradePoints;
 
         // Update summary cards
         this.updateSummaryCards();
+        
+        // Update input lock state
+        this.updateInputLockState();
 
     }
 
@@ -763,6 +850,9 @@ class GradeSheetAnalyzer {
         // Update display
         this.displayResults();
         this.showSuccessMessage('Reset to original grade points');
+        
+        // Clear any locked state
+        this.updateInputLockState();
     }
 
     /**
@@ -855,7 +945,6 @@ class GradeSheetAnalyzer {
                 <td class="course-code">
                     ${course.courseCode}
                     ${course.isManuallyAdded ? '<span class="manual-course-tag">Manual</span>' : ''}
-                    ${course.isRetake ? `<span class="retake-course-tag">(${this.getRetakeType(course, index)})</span>` : ''}
                     ${course.isFailed ? '<span class="failed-course-tag">(F)</span>' : ''}
                 </td>
                 <td>${course.credits.toFixed(2)}</td>
@@ -880,12 +969,6 @@ class GradeSheetAnalyzer {
         });
 
         this.showResults();
-        
-        // Scroll to results
-        document.getElementById('resultsSection').scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-        });
     }
 
     /**
@@ -1008,6 +1091,7 @@ class GradeSheetAnalyzer {
             courseCode: courseCode,
             credits: credits,
             gradePoints: gradePoints,
+            qualityPoints: credits * gradePoints,
             isManuallyAdded: true
         };
 
