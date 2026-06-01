@@ -22,15 +22,9 @@ Disallow: /Queries.csv
 Disallow: /*.pdf$
 Disallow: /*.xls$
 Disallow: /*.xlsx$
-
-# Sitemap location
-Sitemap: https://badhon495.github.io/should-i-retake/sitemap.xml
-
-# Crawl delay (optional - be respectful to search engines)
-Crawl-delay: 1
-
-# Cache control for static files
-User-agent: *
 Disallow: /node_modules/
 Disallow: /temp/
 Disallow: /cache/
+
+# Sitemap location
+Sitemap: https://badhon495.github.io/should-i-retake/sitemap.xml
