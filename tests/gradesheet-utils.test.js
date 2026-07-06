@@ -85,6 +85,49 @@ test('parseCourseLine: returns null for non-course lines', () => {
     assert.strictEqual(utils.parseCourseLine('Student ID : 22341082'), null);
 });
 
+test('extractGradeSheetMetadata: pulls student info, semester order, and per-course metadata from realistic gradesheet text', () => {
+    const sampleText = [
+        'BRAC University',
+        'Kha 224, Bir Uttam Rafiqul Islam Avenue        Page 1 of 2',
+        'Merul Badda, Dhaka 1212.',
+        'GRADE SHEET',
+        'UNOFFICIAL COPY',
+        'Student ID : 22341082                      UNDERGRADUATE PROGRAM',
+        'Name       : Md Sakib Sadman Badhon        PROGRAM: BACHELOR OF SCIENCE IN COMPUTER',
+        'SCIENCE',
+        'Course No  Course Title                                       Credits Earned Grade        Grade Points',
+        'SEMESTER: SPRING 2022',
+        'CSE110     PROGRAMMING LANGUAGE I                             3.00   A                    4.00',
+        'ENG091     FOUNDATION COURSE (IN ENGLISH)                     0.00   A-                   3.70',
+        'MAT110     MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE  3.00   B+                   3.30',
+        '           GEOMETRY',
+        'SEMESTER Credits Attempted          6.00   Credits Earned     6.00                  GPA   3.65',
+        'CUMULATIVE Credits Attempted        6.00   Credits Earned     6.00                  CGPA  3.65',
+        'SEMESTER: SUMMER 2022',
+        'CSE111     PROGRAMMING LANGUAGE-II                            3.00   A                    4.00'
+    ].join('\n');
+
+    const { gradeSheetInfo, courseMeta } = utils.extractGradeSheetMetadata(sampleText);
+
+    assert.strictEqual(gradeSheetInfo.student.id, '22341082');
+    assert.strictEqual(gradeSheetInfo.student.name, 'Md Sakib Sadman Badhon');
+    assert.strictEqual(gradeSheetInfo.student.programType, 'UNDERGRADUATE PROGRAM');
+    assert.strictEqual(gradeSheetInfo.student.program, 'BACHELOR OF SCIENCE IN COMPUTER SCIENCE');
+    assert.deepStrictEqual(gradeSheetInfo.semesterOrder, ['SPRING 2022', 'SUMMER 2022']);
+    assert.deepStrictEqual(gradeSheetInfo.institution, utils.DEFAULT_INSTITUTION);
+
+    assert.deepStrictEqual(courseMeta.CSE110, {
+        title: 'PROGRAMMING LANGUAGE I', grade: 'A', semesterName: 'SPRING 2022'
+    });
+    assert.deepStrictEqual(courseMeta.MAT110, {
+        title: 'MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE GEOMETRY',
+        grade: 'B+', semesterName: 'SPRING 2022'
+    });
+    assert.deepStrictEqual(courseMeta.CSE111, {
+        title: 'PROGRAMMING LANGUAGE-II', grade: 'A', semesterName: 'SUMMER 2022'
+    });
+});
+
 let failed = 0;
 for (const t of tests) {
     try {

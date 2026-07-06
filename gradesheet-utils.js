@@ -84,6 +84,87 @@
         return { courseCode: codeMatch[1], title, grade };
     }
 
+    function extractGradeSheetMetadata(text) {
+        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        const gradeSheetInfo = {
+            student: { id: '', name: '', programType: '', program: '' },
+            institution: {
+                name: DEFAULT_INSTITUTION.name,
+                addressLines: DEFAULT_INSTITUTION.addressLines.slice()
+            },
+            semesterOrder: []
+        };
+        const courseMeta = {};
+        let currentSemesterName = null;
+        let collectingProgram = false;
+        let programParts = [];
+
+        const finalizeProgram = () => {
+            if (collectingProgram) {
+                gradeSheetInfo.student.program = programParts.join(' ').trim();
+                collectingProgram = false;
+            }
+        };
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            const idMatch = parseStudentIdLine(line);
+            if (idMatch) {
+                gradeSheetInfo.student.id = idMatch.id;
+                gradeSheetInfo.student.programType = idMatch.programType;
+                continue;
+            }
+
+            const nameMatch = parseNameLine(line);
+            if (nameMatch) {
+                gradeSheetInfo.student.name = nameMatch.name;
+                programParts = nameMatch.programStart ? [nameMatch.programStart] : [];
+                collectingProgram = true;
+                continue;
+            }
+
+            const semesterName = parseSemesterHeader(line);
+            if (semesterName) {
+                finalizeProgram();
+                currentSemesterName = semesterName;
+                if (!gradeSheetInfo.semesterOrder.includes(semesterName)) {
+                    gradeSheetInfo.semesterOrder.push(semesterName);
+                }
+                continue;
+            }
+
+            if (collectingProgram) {
+                if (isPlainContinuationLine(line)) {
+                    programParts.push(line);
+                    continue;
+                }
+                finalizeProgram();
+            }
+
+            const course = parseCourseLine(line);
+            if (course) {
+                let title = course.title;
+                const next = lines[i + 1];
+                if (next && isPlainContinuationLine(next) && !parseCourseLine(next)) {
+                    title = `${title} ${next}`.trim();
+                    i++;
+                }
+                if (currentSemesterName) {
+                    courseMeta[course.courseCode] = {
+                        title,
+                        grade: course.grade,
+                        semesterName: currentSemesterName
+                    };
+                }
+            }
+        }
+
+        finalizeProgram();
+
+        return { gradeSheetInfo, courseMeta };
+    }
+
     return {
         DEFAULT_INSTITUTION,
         GRADE_SCALE,
@@ -92,6 +173,7 @@
         parseNameLine,
         parseSemesterHeader,
         isPlainContinuationLine,
-        parseCourseLine
+        parseCourseLine,
+        extractGradeSheetMetadata
     };
 });
