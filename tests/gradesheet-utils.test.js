@@ -213,6 +213,54 @@ test('buildGradeSheetData: assembles the full data object, with a placeholder st
     assert.strictEqual(withoutInfo.student.id, '');
 });
 
+test('integration: raw text -> extractGradeSheetMetadata -> enrichCourses -> buildGradeSheetData end-to-end', () => {
+    const sampleText = [
+        'Student ID : 22341082                      UNDERGRADUATE PROGRAM',
+        'Name       : Md Sakib Sadman Badhon        PROGRAM: BACHELOR OF SCIENCE IN COMPUTER',
+        'SCIENCE',
+        'Course No  Course Title                                       Credits Earned Grade        Grade Points',
+        'SEMESTER: SPRING 2022',
+        'CSE110     PROGRAMMING LANGUAGE I                             3.00   A                    4.00',
+        'ENG091     FOUNDATION COURSE (IN ENGLISH)                     0.00   A-                   3.70',
+        'MAT110     MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE  3.00   B+                   3.30',
+        '           GEOMETRY',
+        'SEMESTER Credits Attempted          6.00   Credits Earned     6.00                  GPA   3.65',
+        'CUMULATIVE Credits Attempted        6.00   Credits Earned     6.00                  CGPA  3.65',
+        'SEMESTER: SUMMER 2022',
+        'CSE111     PROGRAMMING LANGUAGE-II                            3.00   A                    4.00'
+    ].join('\n');
+
+    const { gradeSheetInfo, courseMeta } = utils.extractGradeSheetMetadata(sampleText);
+
+    const rawCourses = [
+        { courseCode: 'CSE110', credits: 3, gradePoints: 4.00 },
+        { courseCode: 'ENG091', credits: 0, gradePoints: 3.70 },
+        { courseCode: 'MAT110', credits: 3, gradePoints: 3.30 },
+        { courseCode: 'CSE111', credits: 3, gradePoints: 4.00 }
+    ];
+
+    const enriched = utils.enrichCourses(rawCourses, courseMeta);
+    assert.strictEqual(enriched.find(c => c.courseCode === 'CSE110').semesterName, 'SPRING 2022');
+    assert.strictEqual(
+        enriched.find(c => c.courseCode === 'MAT110').title,
+        'MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE GEOMETRY'
+    );
+    assert.strictEqual(enriched.find(c => c.courseCode === 'CSE111').semesterName, 'SUMMER 2022');
+
+    const data = utils.buildGradeSheetData(gradeSheetInfo, enriched);
+    assert.strictEqual(data.student.id, '22341082');
+    assert.strictEqual(data.student.name, 'Md Sakib Sadman Badhon');
+    assert.strictEqual(data.semesters[0].name, 'SPRING 2022');
+    assert.strictEqual(data.semesters[0].courses.length, 3);
+    assert.ok(Math.abs(data.semesters[0].summary.gpa - 3.65) < 0.001);
+    assert.strictEqual(data.semesters[1].name, 'SUMMER 2022');
+    assert.strictEqual(data.semesters[1].courses.length, 1);
+    assert.ok(Math.abs(data.semesters[1].summary.cgpa - 3.76667) < 0.001);
+
+    // enrichCourses must not mutate its input
+    assert.strictEqual(rawCourses[0].semesterName, undefined);
+});
+
 let failed = 0;
 for (const t of tests) {
     try {

@@ -165,6 +165,18 @@
         return { gradeSheetInfo, courseMeta };
     }
 
+    function enrichCourses(courses, courseMeta) {
+        return courses.map(course => {
+            const meta = courseMeta[course.courseCode];
+            return {
+                ...course,
+                title: meta ? meta.title : (course.title || ''),
+                semesterName: meta ? meta.semesterName : (course.semesterName || null),
+                grade: meta ? meta.grade : (course.grade || pointsToLetter(course.gradePoints))
+            };
+        });
+    }
+
     function groupCoursesForExport(courses, gradeSheetInfo) {
         const order = (gradeSheetInfo && gradeSheetInfo.semesterOrder) || [];
         const groups = new Map();
@@ -259,6 +271,7 @@
         isPlainContinuationLine,
         parseCourseLine,
         extractGradeSheetMetadata,
+        enrichCourses,
         groupCoursesForExport,
         computeSummaries,
         buildGradeSheetData

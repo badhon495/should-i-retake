@@ -342,16 +342,7 @@ class GradeSheetAnalyzer {
      * parsed course using the metadata captured by GradeSheetUtils.
      */
     enrichCoursesWithMetadata(courseMeta) {
-        this.courses.forEach(course => {
-            const meta = courseMeta[course.courseCode];
-            course.title = meta ? meta.title : '';
-            course.semesterName = meta ? meta.semesterName : null;
-            // Original letter grade as parsed from the PDF; this may go stale
-            // if the user later edits gradePoints, but exportToPDF always
-            // recomputes the letter fresh from current gradePoints via
-            // GradeSheetUtils.pointsToLetter, so staleness here is harmless.
-            course.grade = meta ? meta.grade : GradeSheetUtils.pointsToLetter(course.gradePoints);
-        });
+        this.courses = GradeSheetUtils.enrichCourses(this.courses, courseMeta);
     }
 
     /**
