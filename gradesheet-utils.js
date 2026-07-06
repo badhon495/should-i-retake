@@ -165,6 +165,90 @@
         return { gradeSheetInfo, courseMeta };
     }
 
+    function groupCoursesForExport(courses, gradeSheetInfo) {
+        const order = (gradeSheetInfo && gradeSheetInfo.semesterOrder) || [];
+        const groups = new Map();
+        const extra = [];
+
+        const toEntry = (course) => ({
+            code: course.courseCode,
+            title: course.title || '',
+            credits: course.credits,
+            grade: pointsToLetter(course.gradePoints),
+            points: course.gradePoints
+        });
+
+        courses.forEach(course => {
+            const entry = toEntry(course);
+            if (course.semesterName && order.includes(course.semesterName)) {
+                if (!groups.has(course.semesterName)) groups.set(course.semesterName, []);
+                groups.get(course.semesterName).push(entry);
+            } else {
+                extra.push(entry);
+            }
+        });
+
+        const semesters = order
+            .filter(name => groups.has(name))
+            .map(name => ({ name, courses: groups.get(name) }));
+
+        if (semesters.length === 0) {
+            return [{ name: 'COURSES', courses: courses.map(toEntry) }];
+        }
+
+        if (extra.length > 0) {
+            semesters.push({ name: 'ADDITIONAL COURSES', courses: extra });
+        }
+
+        return semesters;
+    }
+
+    function computeSummaries(semesters) {
+        let cumAttempted = 0, cumEarned = 0, cumQualityPoints = 0;
+
+        return semesters.map((sem) => {
+            let semAttempted = 0, semEarned = 0, semQP = 0;
+
+            sem.courses.forEach((c) => {
+                const earned = Number(c.credits) || 0;
+                const attempted = c.attempted != null ? Number(c.attempted) : earned;
+                semAttempted += attempted;
+                semEarned += earned;
+                semQP += earned * Number(c.points);
+            });
+
+            cumAttempted += semAttempted;
+            cumEarned += semEarned;
+            cumQualityPoints += semQP;
+
+            const auto = {
+                semAttempted, semEarned,
+                gpa: semEarned > 0 ? semQP / semEarned : 0,
+                cumAttempted, cumEarned,
+                cgpa: cumEarned > 0 ? cumQualityPoints / cumEarned : 0
+            };
+            return { ...sem, summary: { ...auto, ...(sem.summary || {}) } };
+        });
+    }
+
+    function buildGradeSheetData(gradeSheetInfo, courses) {
+        const info = gradeSheetInfo || null;
+        const student = (info && info.student && info.student.id)
+            ? info.student
+            : { id: '', name: 'Student', programType: '', program: '' };
+        const institution = (info && info.institution) || DEFAULT_INSTITUTION;
+        const semesters = computeSummaries(groupCoursesForExport(courses, info));
+
+        return {
+            institution,
+            documentTitle: 'GRADE SHEET',
+            copyType: 'UNOFFICIAL COPY',
+            watermarkText: 'UNOFFICIAL',
+            student,
+            semesters
+        };
+    }
+
     return {
         DEFAULT_INSTITUTION,
         GRADE_SCALE,
@@ -174,6 +258,9 @@
         parseSemesterHeader,
         isPlainContinuationLine,
         parseCourseLine,
-        extractGradeSheetMetadata
+        extractGradeSheetMetadata,
+        groupCoursesForExport,
+        computeSummaries,
+        buildGradeSheetData
     };
 });

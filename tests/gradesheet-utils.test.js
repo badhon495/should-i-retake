@@ -128,6 +128,91 @@ test('extractGradeSheetMetadata: pulls student info, semester order, and per-cou
     });
 });
 
+test('groupCoursesForExport: groups by semester in semesterOrder, buckets unknown-semester courses last', () => {
+    const courses = [
+        { courseCode: 'CSE110', title: 'PROGRAMMING LANGUAGE I', credits: 3, gradePoints: 4.00, semesterName: 'SPRING 2022' },
+        { courseCode: 'CSE111', title: 'PROGRAMMING LANGUAGE-II', credits: 3, gradePoints: 3.70, semesterName: 'SUMMER 2022' },
+        { courseCode: 'MANUAL1', credits: 3, gradePoints: 4.00, isManuallyAdded: true }
+    ];
+    const gradeSheetInfo = { semesterOrder: ['SPRING 2022', 'SUMMER 2022'] };
+
+    const groups = utils.groupCoursesForExport(courses, gradeSheetInfo);
+
+    assert.deepStrictEqual(groups, [
+        { name: 'SPRING 2022', courses: [{ code: 'CSE110', title: 'PROGRAMMING LANGUAGE I', credits: 3, grade: 'A', points: 4.00 }] },
+        { name: 'SUMMER 2022', courses: [{ code: 'CSE111', title: 'PROGRAMMING LANGUAGE-II', credits: 3, grade: 'A-', points: 3.70 }] },
+        { name: 'ADDITIONAL COURSES', courses: [{ code: 'MANUAL1', title: '', credits: 3, grade: 'A', points: 4.00 }] }
+    ]);
+});
+
+test('groupCoursesForExport: falls back to a single "COURSES" group with no metadata', () => {
+    const courses = [
+        { courseCode: 'CSE110', credits: 3, gradePoints: 4.00 },
+        { courseCode: 'MAT110', credits: 3, gradePoints: 3.30 }
+    ];
+
+    const groups = utils.groupCoursesForExport(courses, null);
+
+    assert.strictEqual(groups.length, 1);
+    assert.strictEqual(groups[0].name, 'COURSES');
+    assert.strictEqual(groups[0].courses.length, 2);
+});
+
+test('computeSummaries: matches known real gradesheet GPA/CGPA figures', () => {
+    // SPRING 2022: CSE110 3cr@4.00, ENG091 0cr@3.70, MAT110 3cr@3.30 -> GPA 3.65, CGPA 3.65
+    // SUMMER 2022: CSE111 3cr@4.00, CSE230 3cr@3.70, ENG101 3cr@3.00, PHY111 3cr@2.00 -> GPA 3.175, cumulative CGPA 3.325
+    const semesters = [
+        {
+            name: 'SPRING 2022',
+            courses: [
+                { code: 'CSE110', credits: 3, points: 4.00 },
+                { code: 'ENG091', credits: 0, points: 3.70 },
+                { code: 'MAT110', credits: 3, points: 3.30 }
+            ]
+        },
+        {
+            name: 'SUMMER 2022',
+            courses: [
+                { code: 'CSE111', credits: 3, points: 4.00 },
+                { code: 'CSE230', credits: 3, points: 3.70 },
+                { code: 'ENG101', credits: 3, points: 3.00 },
+                { code: 'PHY111', credits: 3, points: 2.00 }
+            ]
+        }
+    ];
+
+    const result = utils.computeSummaries(semesters);
+
+    assert.strictEqual(result[0].summary.semEarned, 6);
+    assert.ok(Math.abs(result[0].summary.gpa - 3.65) < 0.001);
+    assert.ok(Math.abs(result[0].summary.cgpa - 3.65) < 0.001);
+
+    assert.strictEqual(result[1].summary.cumEarned, 18);
+    assert.ok(Math.abs(result[1].summary.cgpa - 3.333) < 0.001);
+});
+
+test('buildGradeSheetData: assembles the full data object, with a placeholder student when metadata is missing', () => {
+    const courses = [
+        { courseCode: 'CSE110', title: 'PROGRAMMING LANGUAGE I', credits: 3, gradePoints: 4.00, semesterName: 'SPRING 2022' }
+    ];
+    const gradeSheetInfo = {
+        student: { id: '22341082', name: 'Md Sakib Sadman Badhon', programType: 'UNDERGRADUATE PROGRAM', program: 'BACHELOR OF SCIENCE IN COMPUTER SCIENCE' },
+        institution: utils.DEFAULT_INSTITUTION,
+        semesterOrder: ['SPRING 2022']
+    };
+
+    const withInfo = utils.buildGradeSheetData(gradeSheetInfo, courses);
+    assert.strictEqual(withInfo.student.id, '22341082');
+    assert.strictEqual(withInfo.documentTitle, 'GRADE SHEET');
+    assert.strictEqual(withInfo.copyType, 'UNOFFICIAL COPY');
+    assert.strictEqual(withInfo.semesters[0].name, 'SPRING 2022');
+    assert.ok(withInfo.semesters[0].summary);
+
+    const withoutInfo = utils.buildGradeSheetData(null, courses);
+    assert.strictEqual(withoutInfo.student.name, 'Student');
+    assert.strictEqual(withoutInfo.student.id, '');
+});
+
 let failed = 0;
 for (const t of tests) {
     try {
