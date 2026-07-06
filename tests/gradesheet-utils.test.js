@@ -99,8 +99,14 @@ test('extractGradeSheetMetadata: pulls student info, semester order, and per-cou
         'SEMESTER: SPRING 2022',
         'CSE110     PROGRAMMING LANGUAGE I                             3.00   A                    4.00',
         'ENG091     FOUNDATION COURSE (IN ENGLISH)                     0.00   A-                   3.70',
-        'MAT110     MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE  3.00   B+                   3.30',
-        '           GEOMETRY',
+        // A two-line-wrapped title splits AROUND the course's own
+        // code+numbers line in pdf.js's real Y-coordinate line grouping
+        // (the numbers sit vertically centered between the two title
+        // lines), not after it as a naive `pdftotext -layout` reading
+        // would suggest - see the dedicated real-extraction test below.
+        'MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE',
+        'MAT110     3.00   B+                   3.30',
+        'GEOMETRY',
         'SEMESTER Credits Attempted          6.00   Credits Earned     6.00                  GPA   3.65',
         'CUMULATIVE Credits Attempted        6.00   Credits Earned     6.00                  CGPA  3.65',
         'SEMESTER: SUMMER 2022',
@@ -222,8 +228,9 @@ test('integration: raw text -> extractGradeSheetMetadata -> enrichCourses -> bui
         'SEMESTER: SPRING 2022',
         'CSE110     PROGRAMMING LANGUAGE I                             3.00   A                    4.00',
         'ENG091     FOUNDATION COURSE (IN ENGLISH)                     0.00   A-                   3.70',
-        'MAT110     MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE  3.00   B+                   3.30',
-        '           GEOMETRY',
+        'MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE',
+        'MAT110     3.00   B+                   3.30',
+        'GEOMETRY',
         'SEMESTER Credits Attempted          6.00   Credits Earned     6.00                  GPA   3.65',
         'CUMULATIVE Credits Attempted        6.00   Credits Earned     6.00                  CGPA  3.65',
         'SEMESTER: SUMMER 2022',
@@ -259,6 +266,69 @@ test('integration: raw text -> extractGradeSheetMetadata -> enrichCourses -> bui
 
     // enrichCourses must not mutate its input
     assert.strictEqual(rawCourses[0].semesterName, undefined);
+});
+
+test('extractGradeSheetMetadata: matches REAL pdf.js text-extraction shape, not pdftotext-layout shape', () => {
+    // This is a verbatim excerpt of what script.js's own extractPageText (pdf.js,
+    // Y-coordinate line grouping, single-space join) actually produces for
+    // GradeCanvas/example_gradesheet.pdf - captured by running the app's real
+    // extraction logic against the real PDF, NOT hand-authored or copied from
+    // `pdftotext -layout` (which preserves column gaps as literal multi-space
+    // runs and reorders wrapped lines differently from how pdf.js's Y-rounding
+    // actually buckets them).
+    //
+    // Two real-world quirks this fixture captures that the pdftotext-based
+    // fixtures above do NOT:
+    //  1. Name/PROGRAM: are joined with exactly ONE space, not 2+.
+    //  2. A 2-line wrapped course title splits AROUND the course's own
+    //     code+numbers line: [title line 1] / [code + numbers, no title text
+    //     at all] / [title line 2], because pdf.js buckets the vertically-
+    //     centered numbers into their own Y-line between the two title lines.
+    const sampleText = [
+        'BRAC University',
+        'Page 1 of 2',
+        'Kha 224, Bir Uttam Rafiqul Islam Avenue',
+        'Merul Badda, Dhaka 1212.',
+        'GRADE SHEET',
+        'UNOFFICIAL COPY',
+        'UNDERGRADUATE PROGRAM',
+        'Student ID   :   22341082',
+        'Name   :   Md Sakib Sadman Badhon PROGRAM:   BACHELOR OF SCIENCE IN COMPUTER',
+        'SCIENCE',
+        'Course No   Course Title   Credits Earned   Grade   Grade Points',
+        'SEMESTER:   SPRING 2022',
+        'CSE110   PROGRAMMING LANGUAGE I   3.00   A   4.00',
+        'ENG091   FOUNDATION COURSE (IN ENGLISH)   0.00   A-   3.70',
+        'MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE',
+        'MAT110   3.00   B+   3.30',
+        'GEOMETRY',
+        'SEMESTER   Credits Attempted   6.00   Credits Earned   6.00   GPA   3.65',
+        'CUMULATIVE   Credits Attempted   6.00   Credits Earned   6.00   CGPA   3.65',
+        'SEMESTER:   SUMMER 2022',
+        'CSE111   PROGRAMMING LANGUAGE-II   3.00   A   4.00'
+    ].join('\n');
+
+    const { gradeSheetInfo, courseMeta } = utils.extractGradeSheetMetadata(sampleText);
+
+    // Bug 1: Name must not swallow the PROGRAM: text (single-space join).
+    assert.strictEqual(gradeSheetInfo.student.name, 'Md Sakib Sadman Badhon');
+    assert.strictEqual(gradeSheetInfo.student.program, 'BACHELOR OF SCIENCE IN COMPUTER SCIENCE');
+
+    // Bug 2 (companion to bug 1): programType lives on its own line, one line
+    // BEFORE "Student ID :", with nothing trailing the ID on that line itself.
+    assert.strictEqual(gradeSheetInfo.student.programType, 'UNDERGRADUATE PROGRAM');
+
+    // Bug 3: wrapped title must attach to the course whose numbers actually
+    // sit between the two title lines (MAT110), not the previous course
+    // (ENG091) whose own title is already complete on one line.
+    assert.strictEqual(
+        courseMeta.ENG091.title,
+        'FOUNDATION COURSE (IN ENGLISH)'
+    );
+    assert.strictEqual(
+        courseMeta.MAT110.title,
+        'MATHEMATICS I: DIFFERENTIAL CALCULUS & COORDINATE GEOMETRY'
+    );
 });
 
 let failed = 0;

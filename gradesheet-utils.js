@@ -56,7 +56,11 @@
     }
 
     function parseNameLine(line) {
-        const m = line.match(/^Name\s*:\s*(.+?)(?:\s{2,}PROGRAM:\s*(.*))?$/i);
+        // pdf.js's own text-extraction joins same-line items with exactly one
+        // space regardless of their visual column gap, so this must not
+        // require 2+ spaces before "PROGRAM:" (a `pdftotext -layout`-only
+        // assumption that doesn't hold for the app's real extracted text).
+        const m = line.match(/^Name\s*:\s*(.+?)(?:\s+PROGRAM:\s*(.*))?$/i);
         if (!m) return null;
         return { name: m[1].trim(), programStart: (m[2] || '').trim() };
     }
@@ -98,6 +102,16 @@
         let currentSemesterName = null;
         let collectingProgram = false;
         let programParts = [];
+        // Holds an "orphan" line - text that matched none of the recognized
+        // patterns below - so it can be attached to whatever recognized line
+        // comes next. Real BRACU gradesheets (per pdf.js's own Y-coordinate
+        // line grouping, not `pdftotext -layout`) split some two-column
+        // header rows onto separate lines (programType lands on its own line
+        // immediately before "Student ID :") and wrap a two-line course title
+        // AROUND its own code+numbers line: [title line 1] / [code+numbers,
+        // no title text] / [title line 2]. Both cases are "an unclaimed plain
+        // line immediately preceding the line that actually needs it".
+        let pendingPlainLine = '';
 
         const finalizeProgram = () => {
             if (collectingProgram) {
@@ -112,7 +126,8 @@
             const idMatch = parseStudentIdLine(line);
             if (idMatch) {
                 gradeSheetInfo.student.id = idMatch.id;
-                gradeSheetInfo.student.programType = idMatch.programType;
+                gradeSheetInfo.student.programType = idMatch.programType || pendingPlainLine;
+                pendingPlainLine = '';
                 continue;
             }
 
@@ -121,6 +136,7 @@
                 gradeSheetInfo.student.name = nameMatch.name;
                 programParts = nameMatch.programStart ? [nameMatch.programStart] : [];
                 collectingProgram = true;
+                pendingPlainLine = '';
                 continue;
             }
 
@@ -128,6 +144,7 @@
             if (semesterName) {
                 finalizeProgram();
                 currentSemesterName = semesterName;
+                pendingPlainLine = '';
                 if (!gradeSheetInfo.semesterOrder.includes(semesterName)) {
                     gradeSheetInfo.semesterOrder.push(semesterName);
                 }
@@ -145,11 +162,23 @@
             const course = parseCourseLine(line);
             if (course) {
                 let title = course.title;
-                const next = lines[i + 1];
-                if (next && isPlainContinuationLine(next) && !parseCourseLine(next)) {
-                    title = `${title} ${next}`.trim();
-                    i++;
+                if (!title) {
+                    // Title-less code+numbers line means the row's title
+                    // wrapped to two lines flanking it: the orphan line that
+                    // preceded it is the first half, and (if present) the
+                    // very next line is the second half. A course whose
+                    // title already fits inline never needs either flank -
+                    // only look here when the inline title came back empty,
+                    // so a complete one-line title (e.g. the course right
+                    // before a wrapped one) never steals its neighbor's text.
+                    title = pendingPlainLine;
+                    const next = lines[i + 1];
+                    if (next && isPlainContinuationLine(next) && !parseCourseLine(next)) {
+                        title = title ? `${title} ${next}`.trim() : next;
+                        i++;
+                    }
                 }
+                pendingPlainLine = '';
                 if (currentSemesterName) {
                     courseMeta[course.courseCode] = {
                         title,
@@ -157,7 +186,10 @@
                         semesterName: currentSemesterName
                     };
                 }
+                continue;
             }
+
+            pendingPlainLine = isPlainContinuationLine(line) ? line : '';
         }
 
         finalizeProgram();
