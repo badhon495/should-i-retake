@@ -42,9 +42,56 @@
         return best.letter;
     }
 
+    const COURSE_CODE_PATTERN = /^([A-Z]{2,4}\d{3}[A-Z]?[A-Z0-9]?)/;
+    const HEADER_KEYWORDS = [
+        'SEMESTER:', 'Course No', 'Student ID', 'Name', 'GRADE SHEET',
+        'BRAC University', 'Page ', 'UNOFFICIAL COPY', 'CUMULATIVE',
+        'Credits Attempted', 'PROGRAM:'
+    ];
+
+    function parseStudentIdLine(line) {
+        const m = line.match(/^Student ID\s*:\s*(\S+)\s*(.*)$/i);
+        if (!m) return null;
+        return { id: m[1].trim(), programType: (m[2] || '').trim() };
+    }
+
+    function parseNameLine(line) {
+        const m = line.match(/^Name\s*:\s*(.+?)(?:\s{2,}PROGRAM:\s*(.*))?$/i);
+        if (!m) return null;
+        return { name: m[1].trim(), programStart: (m[2] || '').trim() };
+    }
+
+    function parseSemesterHeader(line) {
+        const m = line.match(/^SEMESTER:\s*(.+)$/i);
+        return m ? m[1].trim() : null;
+    }
+
+    function isPlainContinuationLine(line) {
+        if (!line) return false;
+        if (/\d/.test(line)) return false;
+        return !HEADER_KEYWORDS.some(k => line.includes(k));
+    }
+
+    function parseCourseLine(line) {
+        const codeMatch = line.match(COURSE_CODE_PATTERN);
+        if (!codeMatch) return null;
+        const numberMatches = [...line.matchAll(/\d+\.\d+/g)];
+        if (numberMatches.length < 2) return null;
+        const first = numberMatches[0];
+        const last = numberMatches[numberMatches.length - 1];
+        const title = line.slice(codeMatch[0].length, first.index).trim().replace(/\s+/g, ' ');
+        const grade = line.slice(first.index + first[0].length, last.index).trim();
+        return { courseCode: codeMatch[1], title, grade };
+    }
+
     return {
         DEFAULT_INSTITUTION,
         GRADE_SCALE,
-        pointsToLetter
+        pointsToLetter,
+        parseStudentIdLine,
+        parseNameLine,
+        parseSemesterHeader,
+        isPlainContinuationLine,
+        parseCourseLine
     };
 });
