@@ -228,9 +228,15 @@
                 <button id="resetBtn" class="control-btn reset-btn">
                 Reset to Original
                 </button>
-                <button id="exportBtn" class="control-btn export-btn">
-                    Export to Excel
-                </button>
+                <div class="export-dropdown">
+                    <button id="exportMenuBtn" class="control-btn export-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                        Export &#9662;
+                    </button>
+                    <div id="exportMenu" class="export-menu" role="menu">
+                        <button id="exportExcelBtn" class="export-menu-item" role="menuitem" type="button">Export to Excel</button>
+                        <button id="exportPdfBtn" class="export-menu-item" role="menuitem" type="button">Export to PDF</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Course Table -->

@@ -44,14 +44,22 @@ class GradeSheetAnalyzer {
         document.addEventListener('click', (e) => {
             if (e.target.id === 'resetBtn') {
                 this.resetToOriginal();
-            } else if (e.target.id === 'exportBtn') {
+            } else if (e.target.id === 'exportMenuBtn') {
+                this.toggleExportMenu();
+            } else if (e.target.id === 'exportExcelBtn') {
+                this.closeExportMenu();
                 this.exportToExcel();
+            } else if (e.target.id === 'exportPdfBtn') {
+                this.closeExportMenu();
+                this.exportToPDF();
             } else if (e.target.id === 'addCourseBtn') {
                 this.addNewCourseRow();
             } else if (e.target.classList.contains('save-btn')) {
                 this.saveNewCourse(e.target);
             } else if (e.target.classList.contains('cancel-btn')) {
                 this.cancelNewCourse(e.target);
+            } else if (!e.target.closest('.export-dropdown')) {
+                this.closeExportMenu();
             }
         });
 
@@ -947,6 +955,60 @@ class GradeSheetAnalyzer {
         } catch (error) {
             console.error('Export error:', error);
             this.showError('Failed to export to Excel. Please try again.');
+        }
+    }
+
+    /**
+     * Toggle the Export dropdown menu open/closed.
+     */
+    toggleExportMenu() {
+        const menu = document.getElementById('exportMenu');
+        const btn = document.getElementById('exportMenuBtn');
+        const isOpen = menu.classList.toggle('show');
+        btn.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    /**
+     * Close the Export dropdown menu.
+     */
+    closeExportMenu() {
+        const menu = document.getElementById('exportMenu');
+        const btn = document.getElementById('exportMenuBtn');
+        if (menu) menu.classList.remove('show');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
+
+    /**
+     * Export the current (edited) course list as a BRACU-style gradesheet PDF.
+     */
+    async exportToPDF() {
+        if (this.courses.length === 0) {
+            this.showError('No courses to export');
+            return;
+        }
+
+        try {
+            this.showLoading(true);
+            await GradeSheetPDF.loadPdfLibraries();
+            const logo = await GradeSheetPDF.loadLogoDataUrl();
+
+            const data = GradeSheetUtils.buildGradeSheetData(this.gradeSheetInfo, this.courses);
+            if (logo) {
+                data.institution.logo = logo;
+                data.institution.logoWidthMm = 18;
+                data.institution.logoHeightMm = 18;
+            }
+
+            const dateStr = new Date().toISOString().split('T')[0];
+            const idPart = (this.gradeSheetInfo && this.gradeSheetInfo.student.id) || 'export';
+            GradeSheetPDF.generateGradeSheetPDF(data, `gradesheet_${idPart}_${dateStr}.pdf`);
+
+            this.showSuccessMessage('PDF gradesheet exported successfully!');
+        } catch (error) {
+            console.error('PDF export error:', error);
+            this.showError('Failed to export PDF. Please try again.');
+        } finally {
+            this.showLoading(false);
         }
     }
 
