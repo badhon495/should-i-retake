@@ -6,6 +6,7 @@ class GradeSheetAnalyzer {
     constructor() {
         this.courses = [];
         this.originalCourses = []; // Store original grade points
+        this.gradeSheetInfo = null; // Student/semester metadata captured from the PDF
         this.initializeEventListeners();
         this.showWelcomeMessage();
     }
@@ -261,6 +262,9 @@ class GradeSheetAnalyzer {
         this.courses = [];
         this.originalCourses = [];
 
+        const { gradeSheetInfo, courseMeta } = GradeSheetUtils.extractGradeSheetMetadata(text);
+        this.gradeSheetInfo = gradeSheetInfo;
+
         // Cache regex patterns for better performance
         const courseCodePattern = /^([A-Z]{2,4}\d{3}[A-Z]?[A-Z0-9]?)/;
         const numbersPattern = /\d+\.\d+/g;
@@ -321,7 +325,25 @@ class GradeSheetAnalyzer {
         }
 
         this.courses = Array.from(courseMap.values());
+        this.enrichCoursesWithMetadata(courseMeta);
         this.originalCourses = this.courses.map(course => ({...course}));
+    }
+
+    /**
+     * Attach title, letter grade, and originating semester name to each
+     * parsed course using the metadata captured by GradeSheetUtils.
+     */
+    enrichCoursesWithMetadata(courseMeta) {
+        this.courses.forEach(course => {
+            const meta = courseMeta[course.courseCode];
+            course.title = meta ? meta.title : '';
+            course.semesterName = meta ? meta.semesterName : null;
+            // Original letter grade as parsed from the PDF; this may go stale
+            // if the user later edits gradePoints, but exportToPDF always
+            // recomputes the letter fresh from current gradePoints via
+            // GradeSheetUtils.pointsToLetter, so staleness here is harmless.
+            course.grade = meta ? meta.grade : GradeSheetUtils.pointsToLetter(course.gradePoints);
+        });
     }
 
     /**
@@ -477,6 +499,7 @@ class GradeSheetAnalyzer {
     parseExcelData(data) {
         this.courses = [];
         this.originalCourses = [];
+        this.gradeSheetInfo = null; // Excel imports carry no PDF metadata
 
         if (!data || data.length === 0) {
             return;
