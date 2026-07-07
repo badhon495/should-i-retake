@@ -379,6 +379,49 @@ body {
     box-shadow: 0 8px 25px rgba(166, 218, 149, 0.4);
 }
 
+.export-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.export-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #24273a;
+    border: 1px solid #5b6078;
+    border-radius: 12px;
+    padding: 0.5rem;
+    min-width: 180px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+    z-index: 100;
+}
+
+.export-menu.show {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.export-menu-item {
+    background: transparent;
+    border: none;
+    color: #cad3f5;
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.export-menu-item:hover {
+    background: #363a4f;
+}
+
 /* Editable grade points */
 .grade-input {
     width: 80px;
